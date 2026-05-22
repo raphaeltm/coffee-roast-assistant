@@ -1,34 +1,53 @@
 export type TriggerSource = 'ART' | 'PID';
 export type EventType = 'action' | 'info';
-export type RoastPhase = 'Drying' | 'Maillard' | 'Development';
+export type RoastPhase = 'preheat' | 'drying' | 'maillard' | 'development' | 'end';
 
 export interface TemperatureTrigger {
-  type: 'temperature';
-  value: number;
+  temperature: number;
   unit: 'F';
   source: TriggerSource;
 }
 
-export interface RoastEvent {
-  id: string;
-  eventType: EventType;
-  label: string;
-  phase: RoastPhase;
+interface BaseRoastEvent {
+  index: number;
   trigger: TemperatureTrigger;
-  actions: string[];
-  notes?: string;
+  type: EventType;
+  phase: RoastPhase;
 }
+
+export interface ActionEvent extends BaseRoastEvent {
+  type: 'action';
+  actions: string[];
+  notes?: string[];
+}
+
+export interface InfoEvent extends BaseRoastEvent {
+  type: 'info';
+  info: string[];
+}
+
+export type RoastEvent = ActionEvent | InfoEvent;
 
 export interface RoastProfile {
   id: string;
   name: string;
+  roaster: string;
   events: RoastEvent[];
+}
+
+export interface RoastProfilesData {
+  meta: {
+    model_version: string;
+    principle: string;
+    time_role: string;
+  };
+  profiles: RoastProfile[];
 }
 
 export interface RoastState {
   profile: RoastProfile;
   currentEventIndex: number;
-  completedActions: Record<string, boolean[]>;
+  completedActions: Record<number, boolean[]>;
   isComplete: boolean;
   startedAt: number;
 }

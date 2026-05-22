@@ -1,0 +1,94 @@
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { roastProfiles } from '../data';
+import { useRoastStore } from '../store/roastStore';
+import { RoastProfile } from '../types';
+import { RootStackParamList } from '../../App';
+
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'ProfileSelect'>;
+};
+
+export default function ProfileSelectScreen({ navigation }: Props) {
+  const selectProfile = useRoastStore(s => s.selectProfile);
+  const startRoast = useRoastStore(s => s.startRoast);
+
+  function handleSelect(profile: RoastProfile) {
+    selectProfile(profile);
+    startRoast();
+    navigation.navigate('Roast');
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Coffee Roast Assistant</Text>
+      <Text style={styles.subtitle}>Select a roast profile</Text>
+
+      <FlatList
+        data={roastProfiles}
+        keyExtractor={p => p.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.card} onPress={() => handleSelect(item)}>
+            <Text style={styles.cardName}>{item.name}</Text>
+            <Text style={styles.cardMeta}>{item.roaster} · {item.events.length} events</Text>
+            <Text style={styles.cardArrow}>→</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#111',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 32,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 32,
+  },
+  list: {
+    paddingHorizontal: 24,
+    gap: 16,
+  },
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 16,
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  cardMeta: {
+    fontSize: 13,
+    color: '#888',
+    marginRight: 12,
+  },
+  cardArrow: {
+    fontSize: 20,
+    color: '#555',
+  },
+});

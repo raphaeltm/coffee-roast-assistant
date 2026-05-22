@@ -1,20 +1,28 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import ProfileSelectScreen from './src/screens/ProfileSelectScreen';
+import RoastScreen from './src/screens/RoastScreen';
+
+export type RootStackParamList = {
+  ProfileSelect: undefined;
+  Roast: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="ProfileSelect"
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="ProfileSelect" component={ProfileSelectScreen} />
+          <Stack.Screen name="Roast" component={RoastScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
