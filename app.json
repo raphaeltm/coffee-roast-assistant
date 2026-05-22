@@ -1,25 +1,28 @@
 {
   "expo": {
-    "name": "coffee-roast-assistant",
+    "name": "E46 Roast",
     "slug": "coffee-roast-assistant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/E46-logo.jpg",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/E46-logo.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#111111"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#111111",
+        "foregroundImage": "./assets/E46-logo.jpg"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/E46-logo.jpg"
     },
     "plugins": [
       "expo-asset"

@@ -3,6 +3,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  Image,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,7 +29,13 @@ export default function ProfileSelectScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Coffee Roast Assistant</Text>
+      <View style={styles.watermarkContainer} pointerEvents="none">
+        <Image
+          source={require('../../assets/E46 Inverted Logo.png')}
+          style={styles.watermark}
+        />
+      </View>
+      <Text style={styles.title}>Buongiorno</Text>
       <Text style={styles.subtitle}>Select a roast profile</Text>
 
       <FlatList
@@ -50,6 +58,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#111',
+  },
+  watermarkContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  watermark: {
+    width: 320,
+    height: 320,
+    resizeMode: 'contain',
+    opacity: 0.08,
   },
   title: {
     fontSize: 26,

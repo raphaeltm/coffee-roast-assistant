@@ -15,6 +15,8 @@
 - [x] Checkbox-driven advancement: "Next →" button unlocks when all actions checked
 - [x] Info events show note text with immediate "Next →" (no checkboxes needed)
 - [x] Navigation wired up
+- [x] E46 branding — splash screen logo, app renamed "E46 Roast"
+- [x] Watermark logo on profile select screen (E46 Inverted Logo)
 
 ---
 
@@ -72,6 +74,16 @@ Example shape to add to each event in `roastProfiles.json`:
 - [ ] Automated event triggering when thresholds are reached
 - [ ] ROR prediction using live data
 - [ ] Semi-automated roasting assistance mode
+
+---
+
+## Profile Admin Tool (browser-based)
+
+- [ ] Small local Node/Express server + web UI
+- [ ] View, edit, and add roast profiles
+- [ ] Edits save directly to `src/data/roastProfiles.json`
+- [ ] Reload Expo to see changes in the app
+- [ ] Run on Mac at desk — not needed on-device
 
 ---
 
