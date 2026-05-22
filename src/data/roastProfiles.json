@@ -112,7 +112,8 @@
             "First Crack begins",
             "Development phase active"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": null,
+          "hidden": true
         },
         {
           "index": 7,
@@ -251,7 +252,8 @@
             "First Crack begins",
             "Development phase active"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": null,
+          "hidden": true
         },
         {
           "index": 6,
@@ -419,7 +421,8 @@
             "First Crack begins",
             "Development phase active"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": null,
+          "hidden": true
         },
         {
           "index": 8,
