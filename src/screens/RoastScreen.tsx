@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2A2A2A',
     gap: 4,
+    opacity: 0.45,
   },
   nextLabel: { color: '#555', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
   nextTemp: { color: '#FFF', fontSize: 22, fontWeight: '700' },
