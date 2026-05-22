@@ -11,6 +11,7 @@ import { useRoastStore } from '../store/roastStore';
 import { PHASE_COLORS, PHASE_TEXT_COLORS, PHASE_LABELS } from '../utils/phaseColors';
 import { ActionEvent, InfoEvent } from '../types';
 import { areActionsComplete } from '../engine/roastEngine';
+import { formatTime } from '../utils/formatTime';
 import { RootStackParamList } from '../../App';
 
 type Props = {
@@ -18,11 +19,15 @@ type Props = {
 };
 
 export default function RoastScreen({ navigation }: Props) {
-  const engineState  = useRoastStore(s => s.engineState);
+  const engineState     = useRoastStore(s => s.engineState);
   const selectedProfile = useRoastStore(s => s.selectedProfile);
-  const toggleAction = useRoastStore(s => s.toggleAction);
-  const advanceEvent = useRoastStore(s => s.advanceEvent);
-  const resetRoast   = useRoastStore(s => s.resetRoast);
+  const toggleAction    = useRoastStore(s => s.toggleAction);
+  const advanceEvent    = useRoastStore(s => s.advanceEvent);
+  const resetRoast      = useRoastStore(s => s.resetRoast);
+  const elapsedSeconds  = useRoastStore(s => s.elapsedSeconds);
+  const roastStartedAt  = useRoastStore(s => s.roastStartedAt);
+  const preAlertActive  = useRoastStore(s => s.preAlertActive);
+  const secondsUntilNext = useRoastStore(s => s.secondsUntilNext);
 
   if (!engineState || !selectedProfile) return null;
 
@@ -37,8 +42,9 @@ export default function RoastScreen({ navigation }: Props) {
     ? areActionsComplete(engineState, currentEvent.index)
     : true;
 
-  // Info events have no checkboxes — always ready to advance
   const canAdvance = currentEvent?.type === 'info' || actionsComplete;
+
+  const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
 
   function handleExit() {
     resetRoast();
@@ -52,6 +58,11 @@ export default function RoastScreen({ navigation }: Props) {
         <Text style={[styles.phaseLabel, { color: phaseTextColor }]}>
           {PHASE_LABELS[phase]}
         </Text>
+        {timerDisplay && (
+          <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
+            ▶ {timerDisplay}
+          </Text>
+        )}
         <Text style={[styles.stepCounter, { color: phaseTextColor }]}>
           {stepNumber} / {totalEvents}
         </Text>
@@ -140,6 +151,15 @@ export default function RoastScreen({ navigation }: Props) {
           </View>
         )}
 
+        {/* Pre-alert banner */}
+        {preAlertActive && secondsUntilNext !== null && (
+          <View style={styles.preAlertBanner}>
+            <Text style={styles.preAlertText}>
+              ⏱ Next step in ~{secondsUntilNext}s
+            </Text>
+          </View>
+        )}
+
         {/* Next button */}
         {!isComplete && (
           <TouchableOpacity
@@ -173,6 +193,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   phaseLabel: { fontSize: 16, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  timerDisplay: { fontSize: 14, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
   stepCounter: { fontSize: 14, opacity: 0.8 },
 
   scroll: { padding: 20, gap: 16 },
@@ -252,6 +273,19 @@ const styles = StyleSheet.create({
   completeEmoji: { fontSize: 48 },
   completeText: { color: '#4ADE80', fontSize: 24, fontWeight: '700' },
 
+  preAlertBanner: {
+    backgroundColor: '#7C4A00',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E67E22',
+  },
+  preAlertText: {
+    color: '#FFB347',
+    fontSize: 16,
+    fontWeight: '700',
+  },
   exitButton: {
     padding: 18,
     borderRadius: 16,

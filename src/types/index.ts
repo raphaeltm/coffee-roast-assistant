@@ -43,6 +43,8 @@ export interface RoastProfilesData {
     model_version: string;
     principle: string;
     time_role: string;
+    /** Seconds before next estimated event to trigger pre-alert */
+    alert_threshold_seconds: number;
   };
   profiles: RoastProfile[];
 }

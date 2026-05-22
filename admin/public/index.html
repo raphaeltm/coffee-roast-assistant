@@ -182,7 +182,11 @@
 <header>
   <h1>E46 Roast — Profile Admin</h1>
   <img src="E46-logo-gray.png" alt="E46 Logo" style="height:84px;width:84px;object-fit:contain;" />
-  <span>Edits save directly to roastProfiles.json</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <label style="font-size:12px;color:#666">Alert threshold</label>
+    <input id="alertThreshold" type="number" min="1" max="60" style="width:52px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;color:#fff;padding:5px 8px;font-size:13px" oninput="markDirty()" />
+    <span style="font-size:12px;color:#666">sec</span>
+  </div>
 </header>
 
 <div class="layout">
@@ -241,6 +245,8 @@ function mssToSeconds(str) {
 async function loadData() {
   const res = await fetch('/api/profiles');
   data = await res.json();
+  const thresholdEl = document.getElementById('alertThreshold');
+  if (thresholdEl) thresholdEl.value = data.meta.alert_threshold_seconds ?? 10;
   const restored = sessionStorage.getItem('selectedProfileId');
   if (restored) { selectedProfileId = restored; sessionStorage.removeItem('selectedProfileId'); }
   renderSidebar();
@@ -251,6 +257,8 @@ async function loadData() {
 
 async function saveData() {
   collectCurrentProfile();
+  const thresholdEl = document.getElementById('alertThreshold');
+  if (thresholdEl) data.meta.alert_threshold_seconds = parseInt(thresholdEl.value) || 10;
   const res = await fetch('/api/profiles', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

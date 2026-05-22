@@ -103,6 +103,26 @@ export function areActionsComplete(state: EngineState, eventIndex: number): bool
 }
 
 /**
+ * Returns seconds remaining until next event's estimated time.
+ * Returns null if next event has no estimated time (no alert will fire).
+ * Artisan note: this same function will work with live elapsed time from Artisan.
+ */
+export function evaluatePreAlert(
+  elapsedSeconds: number,
+  nextEvent: RoastEvent | null,
+  thresholdSeconds: number,
+): { preAlertActive: boolean; secondsUntilNext: number | null } {
+  if (!nextEvent || nextEvent.estimated_time_seconds === null) {
+    return { preAlertActive: false, secondsUntilNext: null };
+  }
+  const secondsUntilNext = nextEvent.estimated_time_seconds - elapsedSeconds;
+  return {
+    preAlertActive: secondsUntilNext <= thresholdSeconds && secondsUntilNext > 0,
+    secondsUntilNext: Math.round(secondsUntilNext),
+  };
+}
+
+/**
  * MVP 1: Manually advance to the next event in sequence.
  * Temperature-driven advancement is preserved in evaluateTemperature
  * for use in Phase 2/3 — this is the manual override for Phase 1.

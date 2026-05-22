@@ -5,11 +5,19 @@ import {
   createInitialEngineState,
   toggleAction,
   advanceToNextEvent,
+  evaluatePreAlert,
 } from '../engine/roastEngine';
+import { alertThresholdSeconds } from '../data';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
   engineState: EngineState | null;
+
+  // Timer (advisory only — never a trigger)
+  roastStartedAt: number | null;
+  elapsedSeconds: number;
+  preAlertActive: boolean;
+  secondsUntilNext: number | null;
 
   selectProfile: (profile: RoastProfile) => void;
   startRoast: () => void;
@@ -18,12 +26,26 @@ interface RoastStore {
   resetRoast: () => void;
 }
 
+let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+function clearTimer() {
+  if (timerInterval !== null) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
 export const useRoastStore = create<RoastStore>((set, get) => ({
   selectedProfile: null,
   engineState: null,
+  roastStartedAt: null,
+  elapsedSeconds: 0,
+  preAlertActive: false,
+  secondsUntilNext: null,
 
   selectProfile: (profile) => {
-    set({ selectedProfile: profile, engineState: null });
+    clearTimer();
+    set({ selectedProfile: profile, engineState: null, roastStartedAt: null, elapsedSeconds: 0, preAlertActive: false, secondsUntilNext: null });
   },
 
   startRoast: () => {
@@ -39,12 +61,38 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   },
 
   advanceEvent: () => {
-    const { selectedProfile, engineState } = get();
+    const { selectedProfile, engineState, roastStartedAt } = get();
     if (!selectedProfile || !engineState) return;
-    set({ engineState: advanceToNextEvent(engineState, selectedProfile) });
+
+    const newEngineState = advanceToNextEvent(engineState, selectedProfile);
+
+    // Start timer when leaving index 0 (first event confirmed)
+    if (engineState.currentEventIndex === 0 && roastStartedAt === null) {
+      const now = Date.now();
+      clearTimer();
+      timerInterval = setInterval(() => {
+        const { engineState: es, roastStartedAt: startedAt } = get();
+        if (!startedAt) return;
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        const { preAlertActive, secondsUntilNext } = evaluatePreAlert(
+          elapsed,
+          es?.nextEvent ?? null,
+          alertThresholdSeconds,
+        );
+        set({ elapsedSeconds: elapsed, preAlertActive, secondsUntilNext });
+      }, 1000);
+      set({ engineState: newEngineState, roastStartedAt: now });
+      return;
+    }
+
+    set({ engineState: newEngineState });
+
+    // Stop timer when roast is complete
+    if (newEngineState.isComplete) clearTimer();
   },
 
   resetRoast: () => {
-    set({ selectedProfile: null, engineState: null });
+    clearTimer();
+    set({ selectedProfile: null, engineState: null, roastStartedAt: null, elapsedSeconds: 0, preAlertActive: false, secondsUntilNext: null });
   },
 }));
