@@ -57,9 +57,10 @@
     .profile-item.active { background: #222; border-left: 3px solid #e67e22; }
     .profile-item-name { font-size: 14px; font-weight: 600; color: #fff; }
     .profile-item-meta { font-size: 12px; color: #666; margin-top: 2px; }
-    .profile-item-delete {
+    .profile-item-duplicate, .profile-item-delete {
       background: none; border: none; color: #444; cursor: pointer; font-size: 16px; padding: 4px;
     }
+    .profile-item-duplicate:hover { color: #e67e22; }
     .profile-item-delete:hover { color: #e74c3c; }
 
     /* Main content */
@@ -267,6 +268,7 @@ function renderSidebar() {
         <div class="profile-item-name">${p.name}</div>
         <div class="profile-item-meta">${p.roaster} · ${p.events.length} events</div>
       </div>
+      <button class="profile-item-duplicate" onclick="event.stopPropagation();duplicateProfile('${p.id}')" title="Duplicate">⧉</button>
       <button class="profile-item-delete" onclick="event.stopPropagation();deleteProfile('${p.id}')" title="Delete">✕</button>
     </div>
   `).join('');
@@ -295,6 +297,21 @@ function newProfile() {
   openEventIndexes.add(0);
   renderSidebar();
   renderProfile(id);
+  markDirty();
+}
+
+function duplicateProfile(id) {
+  collectCurrentProfile();
+  const source = getProfile(id);
+  const newId = 'profile_' + Date.now();
+  const copy = JSON.parse(JSON.stringify(source)); // deep clone
+  copy.id = newId;
+  copy.name = 'Copy of ' + source.name;
+  data.profiles.push(copy);
+  selectedProfileId = newId;
+  openEventIndexes.clear();
+  renderSidebar();
+  renderProfile(newId);
   markDirty();
 }
 
