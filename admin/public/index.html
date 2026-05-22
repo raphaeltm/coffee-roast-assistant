@@ -109,6 +109,11 @@
     .event-summary { flex: 1; }
     .event-summary-title { font-size: 14px; font-weight: 600; color: #fff; }
     .event-summary-meta { font-size: 12px; color: #666; margin-top: 2px; }
+    .event-time-badge {
+      font-size: 13px; font-weight: 600; color: #666;
+      background: #222; border-radius: 6px; padding: 4px 10px;
+      margin-right: 4px; font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
     .event-card-actions { display: flex; gap: 8px; }
     .event-card-actions button {
       background: none; border: none; color: #444; cursor: pointer; font-size: 18px; padding: 4px 6px;
@@ -414,6 +419,7 @@ function renderEventCard(ev, i, total) {
           <div class="event-summary-title">${ev.trigger.temperature}°F (${ev.trigger.source}) — ${ev.phase}</div>
           <div class="event-summary-meta">${ev.type === 'action' ? (ev.actions||[]).join(' · ') : (ev.info||[]).join(' · ')}</div>
         </div>
+        <div class="event-time-badge">${i === 0 ? '0:00' : (ev.estimated_time_seconds !== null ? secondsToMSS(ev.estimated_time_seconds) : '—')}</div>
         <div class="event-card-actions" onclick="event.stopPropagation()">
           ${i > 0 ? `<button onclick="moveEvent(${i},-1)" title="Move up">↑</button>` : ''}
           ${i < total-1 ? `<button onclick="moveEvent(${i},1)" title="Move down">↓</button>` : ''}
