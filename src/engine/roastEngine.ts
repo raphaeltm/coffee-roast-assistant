@@ -1,4 +1,4 @@
-import { RoastProfile, RoastEvent, ActionEvent } from '../types';
+import { RoastProfile, RoastEvent, ActionEvent, InfoEvent } from '../types';
 
 export interface EngineState {
   currentEvent: RoastEvent | null;
@@ -111,7 +111,13 @@ export function advanceToNextEvent(
   state: EngineState,
   profile: RoastProfile,
 ): EngineState {
-  const nextIndex = state.currentEventIndex + 1;
+  let nextIndex = state.currentEventIndex + 1;
+  // Skip hidden info events
+  while (nextIndex < profile.events.length) {
+    const ev = profile.events[nextIndex];
+    if (ev.type === 'info' && (ev as InfoEvent).hidden === true) nextIndex++;
+    else break;
+  }
   if (nextIndex >= profile.events.length) {
     return { ...state, isComplete: true };
   }

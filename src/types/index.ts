@@ -26,6 +26,7 @@ export interface ActionEvent extends BaseRoastEvent {
 export interface InfoEvent extends BaseRoastEvent {
   type: 'info';
   info: string[];
+  hidden?: boolean;
 }
 
 export type RoastEvent = ActionEvent | InfoEvent;

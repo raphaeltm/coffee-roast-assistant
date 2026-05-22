@@ -8,7 +8,7 @@
     {
       "id": "prato",
       "name": "Prato",
-      "roaster": "Prato",
+      "roaster": "E46",
       "events": [
         {
           "index": 0,
@@ -54,7 +54,7 @@
           "actions": [
             "🌬 Air 1 (50/50)"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 314
         },
         {
           "index": 3,
@@ -68,7 +68,7 @@
           "actions": [
             "🔥 Gas 4"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 372
         },
         {
           "index": 4,
@@ -82,7 +82,7 @@
           "actions": [
             "🔥 Gas 3"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 415
         },
         {
           "index": 5,
@@ -92,12 +92,12 @@
             "source": "ART"
           },
           "type": "action",
-          "phase": "development",
+          "phase": "maillard",
           "actions": [
             "🔥 Gas 2",
             "🌬 Air 100% Drum (A2)"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 547
         },
         {
           "index": 6,
@@ -126,7 +126,7 @@
           "actions": [
             "🔥 Gas 1"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 688
         },
         {
           "index": 8,
@@ -140,7 +140,7 @@
           "actions": [
             "🔥 Gas OFF"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 733
         },
         {
           "index": 9,
@@ -156,7 +156,7 @@
             "🌬 Move to Cooling Tray",
             "⏹ Stop ART / ROR Recording"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 792
         }
       ]
     },
@@ -207,7 +207,7 @@
             "🌬 Air 1 (50/50)",
             "🔥 Gas 4"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 305
         },
         {
           "index": 3,
@@ -221,7 +221,7 @@
           "actions": [
             "🔥 Gas 3"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 393
         },
         {
           "index": 4,
@@ -231,12 +231,12 @@
             "source": "ART"
           },
           "type": "action",
-          "phase": "development",
+          "phase": "maillard",
           "actions": [
             "🔥 Gas 2",
             "🌬 Air 100% Drum (A2)"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 520
         },
         {
           "index": 5,
@@ -265,7 +265,7 @@
           "actions": [
             "🔥 Gas 1"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 657
         },
         {
           "index": 7,
@@ -279,7 +279,7 @@
           "actions": [
             "🔥 Gas OFF"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 690
         },
         {
           "index": 8,
@@ -295,12 +295,12 @@
             "🌬 Move to Cooling Tray",
             "⏹ Stop ART / ROR Recording"
           ],
-          "estimated_time_seconds": null
+          "estimated_time_seconds": 753
         }
       ]
     },
     {
-      "id": "profile_1779468966087",
+      "id": "profile_1779470243319",
       "name": "J Hill - El Salvador",
       "roaster": "E46",
       "events": [
@@ -313,8 +313,157 @@
           },
           "type": "action",
           "phase": "preheat",
-          "actions": [],
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
           "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 250,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 274
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 275,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 324
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 300,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 386
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 350,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2"
+          ],
+          "estimated_time_seconds": 533
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 609
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 416,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 842
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 428,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 902
+        },
+        {
+          "index": 10,
+          "trigger": {
+            "temperature": 437,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 957
         }
       ]
     }
