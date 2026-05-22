@@ -17,6 +17,14 @@
 - [x] Navigation wired up
 - [x] E46 branding — splash screen logo, app renamed "E46 Roast"
 - [x] Watermark logo on profile select screen (E46 Inverted Logo)
+- [x] `estimated_time_seconds` added to all events (stored as seconds, displayed as M:SS)
+- [x] `formatTime` / `parseTime` utilities
+- [x] Browser-based profile admin (`admin/`) — edit profiles, events, times, actions, notes
+- [x] Admin: duplicate profile, autocomplete action picker, time badge in event header
+- [x] Admin: auto-reload after save, restores selected profile
+- [x] Admin: "Hide in app" toggle for info events; engine skips hidden events
+- [x] UI: Up Next card at 45% opacity
+- [x] UI: current event card enlarged (58px temp, bigger checkboxes, larger action text)
 
 ---
 
@@ -77,13 +85,12 @@ Example shape to add to each event in `roastProfiles.json`:
 
 ---
 
-## Profile Admin Tool (browser-based)
+## Profile Admin Tool (browser-based) ✅
 
-- [ ] Small local Node/Express server + web UI
-- [ ] View, edit, and add roast profiles
-- [ ] Edits save directly to `src/data/roastProfiles.json`
-- [ ] Reload Expo to see changes in the app
-- [ ] Run on Mac at desk — not needed on-device
+- [x] Small local Node/Express server + web UI (`admin/`)
+- [x] View, edit, add, duplicate and delete roast profiles
+- [x] Edits save directly to `src/data/roastProfiles.json`
+- [x] Run with `cd admin && npm start` → http://localhost:3001
 
 ---
 
