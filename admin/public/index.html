@@ -234,6 +234,8 @@ function mssToSeconds(str) {
 async function loadData() {
   const res = await fetch('/api/profiles');
   data = await res.json();
+  const restored = sessionStorage.getItem('selectedProfileId');
+  if (restored) { selectedProfileId = restored; sessionStorage.removeItem('selectedProfileId'); }
   renderSidebar();
   if (selectedProfileId) renderProfile(selectedProfileId);
   else document.getElementById('main').innerHTML = `
@@ -251,6 +253,7 @@ async function saveData() {
   if (res.ok) {
     msg.textContent = '✓ Saved — reloading…';
     msg.className = 'save-bar-msg saved';
+    if (selectedProfileId) sessionStorage.setItem('selectedProfileId', selectedProfileId);
     setTimeout(() => location.reload(), 800);
   } else {
     msg.textContent = '✗ Save failed — check the server terminal';
