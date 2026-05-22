@@ -249,9 +249,9 @@ async function saveData() {
   });
   const msg = document.getElementById('saveMsg');
   if (res.ok) {
-    msg.textContent = '✓ Saved to roastProfiles.json';
+    msg.textContent = '✓ Saved — reloading…';
     msg.className = 'save-bar-msg saved';
-    setTimeout(() => { msg.textContent = 'All changes saved.'; msg.className = 'save-bar-msg'; }, 3000);
+    setTimeout(() => location.reload(), 800);
   } else {
     msg.textContent = '✗ Save failed — check the server terminal';
     msg.className = 'save-bar-msg error';
