@@ -12,141 +12,84 @@
       "events": [
         {
           "index": 0,
-          "trigger": {
-            "temperature": 370,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 370, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "preheat",
-          "actions": [
-            "🔥 Gas 5",
-            "💻 Start ART"
-          ]
+          "actions": ["🔥 Gas 5", "💻 Start ART"],
+          "estimated_time_seconds": 0
         },
         {
           "index": 1,
-          "trigger": {
-            "temperature": 405,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 405, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "drying",
-          "actions": [
-            "🫘 Charge Beans"
-          ],
-          "notes": [
-            "Charge causes expected temperature drop"
-          ]
+          "actions": ["🫘 Charge Beans"],
+          "notes": ["Charge causes expected temperature drop"],
+          "estimated_time_seconds": null
         },
         {
           "index": 2,
-          "trigger": {
-            "temperature": 270,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 270, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "drying",
-          "actions": [
-            "🌬 Air 1 (50/50)"
-          ]
+          "actions": ["🌬 Air 1 (50/50)"],
+          "estimated_time_seconds": null
         },
         {
           "index": 3,
-          "trigger": {
-            "temperature": 300,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 300, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "maillard",
-          "actions": [
-            "🔥 Gas 4"
-          ]
+          "actions": ["🔥 Gas 4"],
+          "estimated_time_seconds": null
         },
         {
           "index": 4,
-          "trigger": {
-            "temperature": 320,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 320, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "maillard",
-          "actions": [
-            "🔥 Gas 3"
-          ]
+          "actions": ["🔥 Gas 3"],
+          "estimated_time_seconds": null
         },
         {
           "index": 5,
-          "trigger": {
-            "temperature": 370,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 370, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas 2",
-            "🌬 Air 100% Drum (A2)"
-          ]
+          "actions": ["🔥 Gas 2", "🌬 Air 100% Drum (A2)"],
+          "estimated_time_seconds": null
         },
         {
           "index": 6,
-          "trigger": {
-            "temperature": 389,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 389, "unit": "F", "source": "ART" },
           "type": "info",
           "phase": "development",
-          "info": [
-            "First Crack begins",
-            "Development phase active"
-          ]
+          "info": ["First Crack begins", "Development phase active"],
+          "estimated_time_seconds": null
         },
         {
           "index": 7,
-          "trigger": {
-            "temperature": 408,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 408, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas 1"
-          ]
+          "actions": ["🔥 Gas 1"],
+          "estimated_time_seconds": null
         },
         {
           "index": 8,
-          "trigger": {
-            "temperature": 417,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 417, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas OFF"
-          ]
+          "actions": ["🔥 Gas OFF"],
+          "estimated_time_seconds": null
         },
         {
           "index": 9,
-          "trigger": {
-            "temperature": 429,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 429, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "end",
-          "actions": [
-            "🫘 Drop Beans",
-            "🌬 Move to Cooling Tray",
-            "⏹ Stop ART / ROR Recording"
-          ]
+          "actions": ["🫘 Drop Beans", "🌬 Move to Cooling Tray", "⏹ Stop ART / ROR Recording"],
+          "estimated_time_seconds": null
         }
       ]
     },
@@ -157,126 +100,75 @@
       "events": [
         {
           "index": 0,
-          "trigger": {
-            "temperature": 370,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 370, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "preheat",
-          "actions": [
-            "🔥 Gas 5",
-            "💻 Start ART"
-          ]
+          "actions": ["🔥 Gas 5", "💻 Start ART"],
+          "estimated_time_seconds": 0
         },
         {
           "index": 1,
-          "trigger": {
-            "temperature": 405,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 405, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "drying",
-          "actions": [
-            "🫘 Charge Beans"
-          ]
+          "actions": ["🫘 Charge Beans"],
+          "estimated_time_seconds": null
         },
         {
           "index": 2,
-          "trigger": {
-            "temperature": 275,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 275, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "drying",
-          "actions": [
-            "🌬 Air 1 (50/50)",
-            "🔥 Gas 4"
-          ]
+          "actions": ["🌬 Air 1 (50/50)", "🔥 Gas 4"],
+          "estimated_time_seconds": null
         },
         {
           "index": 3,
-          "trigger": {
-            "temperature": 320,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 320, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "maillard",
-          "actions": [
-            "🔥 Gas 3"
-          ]
+          "actions": ["🔥 Gas 3"],
+          "estimated_time_seconds": null
         },
         {
           "index": 4,
-          "trigger": {
-            "temperature": 370,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 370, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas 2",
-            "🌬 Air 100% Drum (A2)"
-          ]
+          "actions": ["🔥 Gas 2", "🌬 Air 100% Drum (A2)"],
+          "estimated_time_seconds": null
         },
         {
           "index": 5,
-          "trigger": {
-            "temperature": 389,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 389, "unit": "F", "source": "ART" },
           "type": "info",
           "phase": "development",
-          "info": [
-            "First Crack begins",
-            "Development phase active"
-          ]
+          "info": ["First Crack begins", "Development phase active"],
+          "estimated_time_seconds": null
         },
         {
           "index": 6,
-          "trigger": {
-            "temperature": 410,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 410, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas 1"
-          ]
+          "actions": ["🔥 Gas 1"],
+          "estimated_time_seconds": null
         },
         {
           "index": 7,
-          "trigger": {
-            "temperature": 418,
-            "unit": "F",
-            "source": "ART"
-          },
+          "trigger": { "temperature": 418, "unit": "F", "source": "ART" },
           "type": "action",
           "phase": "development",
-          "actions": [
-            "🔥 Gas OFF"
-          ]
+          "actions": ["🔥 Gas OFF"],
+          "estimated_time_seconds": null
         },
         {
           "index": 8,
-          "trigger": {
-            "temperature": 432,
-            "unit": "F",
-            "source": "PID"
-          },
+          "trigger": { "temperature": 432, "unit": "F", "source": "PID" },
           "type": "action",
           "phase": "end",
-          "actions": [
-            "🫘 Drop Beans",
-            "🌬 Move to Cooling Tray",
-            "⏹ Stop ART / ROR Recording"
-          ]
+          "actions": ["🫘 Drop Beans", "🌬 Move to Cooling Tray", "⏹ Stop ART / ROR Recording"],
+          "estimated_time_seconds": null
         }
       ]
     }

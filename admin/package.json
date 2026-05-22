@@ -1,0 +1,12 @@
+{
+  "name": "coffee-roast-admin",
+  "version": "1.0.0",
+  "description": "Local admin server for editing roast profiles",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

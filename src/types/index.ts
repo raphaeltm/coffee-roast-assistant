@@ -13,6 +13,8 @@ interface BaseRoastEvent {
   trigger: TemperatureTrigger;
   type: EventType;
   phase: RoastPhase;
+  /** Seconds elapsed from roast start. 0 for first event, null = not yet set. */
+  estimated_time_seconds: number | null;
 }
 
 export interface ActionEvent extends BaseRoastEvent {

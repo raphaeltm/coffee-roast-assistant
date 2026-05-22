@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E46 Roast — Profile Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    header span { font-size: 13px; color: #666; }
+
+    .layout { display: flex; height: calc(100vh - 57px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: #161616;
+      border-right: 1px solid #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-header h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+    .profile-list { flex: 1; overflow-y: auto; }
+    .profile-item {
+      padding: 14px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #1e1e1e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .profile-item:hover { background: #1e1e1e; }
+    .profile-item.active { background: #222; border-left: 3px solid #e67e22; }
+    .profile-item-name { font-size: 14px; font-weight: 600; color: #fff; }
+    .profile-item-meta { font-size: 12px; color: #666; margin-top: 2px; }
+    .profile-item-delete {
+      background: none; border: none; color: #444; cursor: pointer; font-size: 16px; padding: 4px;
+    }
+    .profile-item-delete:hover { color: #e74c3c; }
+
+    /* Main content */
+    .main { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; color: #444; gap: 12px;
+    }
+    .empty-state h2 { font-size: 20px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Profile editor */
+    .profile-meta { display: flex; gap: 16px; margin-bottom: 24px; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .field label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+    .field input, .field select {
+      background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px;
+      color: #fff; padding: 10px 12px; font-size: 14px; width: 100%;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: #e67e22; }
+
+    /* Events */
+    .events-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .events-header h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+
+    .event-card {
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px;
+      margin-bottom: 12px; overflow: hidden;
+    }
+    .event-card-header {
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; user-select: none;
+    }
+    .event-card-header:hover { background: #1e1e1e; }
+    .event-index {
+      background: #2a2a2a; color: #888; font-size: 12px; font-weight: 700;
+      width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .event-phase-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .event-summary { flex: 1; }
+    .event-summary-title { font-size: 14px; font-weight: 600; color: #fff; }
+    .event-summary-meta { font-size: 12px; color: #666; margin-top: 2px; }
+    .event-card-actions { display: flex; gap: 8px; }
+    .event-card-actions button {
+      background: none; border: none; color: #444; cursor: pointer; font-size: 18px; padding: 4px 6px;
+    }
+    .event-card-actions button:hover { color: #fff; }
+    .event-card-actions .del:hover { color: #e74c3c; }
+
+    .event-body { padding: 16px; border-top: 1px solid #222; display: none; }
+    .event-body.open { display: block; }
+
+    .event-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .event-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+    .list-editor { margin-top: 8px; }
+    .list-editor-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; }
+    .list-item { display: flex; gap: 8px; margin-bottom: 6px; }
+    .list-item input {
+      flex: 1; background: #222; border: 1px solid #2a2a2a; border-radius: 6px;
+      color: #fff; padding: 8px 10px; font-size: 14px;
+    }
+    .list-item input:focus { outline: none; border-color: #e67e22; }
+    .list-item button {
+      background: none; border: none; color: #444; cursor: pointer; font-size: 16px; padding: 4px 8px;
+    }
+    .list-item button:hover { color: #e74c3c; }
+
+    /* Buttons */
+    .btn {
+      padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #e67e22; color: #fff; }
+    .btn-secondary { background: #2a2a2a; color: #ccc; }
+    .btn-ghost { background: none; border: 1px solid #2a2a2a; color: #888; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-danger { background: #c0392b; color: #fff; }
+
+    .save-bar {
+      position: fixed; bottom: 0; left: 240px; right: 0;
+      background: #1a1a1a; border-top: 1px solid #2a2a2a;
+      padding: 14px 32px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .save-bar-msg { font-size: 13px; color: #666; }
+    .save-bar-msg.saved { color: #27ae60; }
+    .save-bar-msg.error { color: #e74c3c; }
+
+    .type-toggle { display: flex; gap: 8px; }
+    .type-toggle button {
+      padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
+      border: 1px solid #2a2a2a; background: #222; color: #888;
+    }
+    .type-toggle button.active { background: #e67e22; border-color: #e67e22; color: #fff; }
+
+    .phase-colors { preheat: #3A3A3A; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>☕ E46 Roast — Profile Admin</h1>
+  <span>Edits save directly to roastProfiles.json</span>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Profiles</h2>
+      <button class="btn btn-primary btn-sm" onclick="newProfile()">+ New</button>
+    </div>
+    <div class="profile-list" id="profileList"></div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="empty-state">
+      <h2>No profile selected</h2>
+      <p>Select a profile from the sidebar or create a new one.</p>
+    </div>
+  </main>
+</div>
+
+<div class="save-bar">
+  <span class="save-bar-msg" id="saveMsg">All changes saved.</span>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-secondary" onclick="loadData()">↺ Reload</button>
+    <button class="btn btn-primary" onclick="saveData()">Save to JSON</button>
+  </div>
+</div>
+
+<script>
+const PHASE_COLORS = {
+  preheat: '#3A3A3A', drying: '#3B82F6', maillard: '#EAB308',
+  development: '#EF4444', end: '#3A3A3A'
+};
+const PHASES = ['preheat','drying','maillard','development','end'];
+const SOURCES = ['ART','PID'];
+
+let data = null;
+let selectedProfileId = null;
+let openEventIndexes = new Set();
+
+// ── Time helpers ──────────────────────────────────────────────────────────────
+function secondsToMSS(s) {
+  if (s === null || s === undefined || s === '') return '';
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+
+function mssToSeconds(str) {
+  if (!str || str.trim() === '') return null;
+  const match = str.match(/^(\d+):([0-5]\d)$/);
+  if (!match) return null;
+  return parseInt(match[1]) * 60 + parseInt(match[2]);
+}
+
+// ── Data load/save ────────────────────────────────────────────────────────────
+async function loadData() {
+  const res = await fetch('/api/profiles');
+  data = await res.json();
+  renderSidebar();
+  if (selectedProfileId) renderProfile(selectedProfileId);
+  else document.getElementById('main').innerHTML = `
+    <div class="empty-state"><h2>Select a profile</h2><p>Or create a new one.</p></div>`;
+}
+
+async function saveData() {
+  collectCurrentProfile();
+  const res = await fetch('/api/profiles', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const msg = document.getElementById('saveMsg');
+  if (res.ok) {
+    msg.textContent = '✓ Saved to roastProfiles.json';
+    msg.className = 'save-bar-msg saved';
+    setTimeout(() => { msg.textContent = 'All changes saved.'; msg.className = 'save-bar-msg'; }, 3000);
+  } else {
+    msg.textContent = '✗ Save failed — check the server terminal';
+    msg.className = 'save-bar-msg error';
+  }
+}
+
+function markDirty() {
+  const msg = document.getElementById('saveMsg');
+  msg.textContent = 'Unsaved changes';
+  msg.className = 'save-bar-msg';
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('profileList');
+  list.innerHTML = data.profiles.map(p => `
+    <div class="profile-item ${p.id === selectedProfileId ? 'active' : ''}" onclick="selectProfile('${p.id}')">
+      <div>
+        <div class="profile-item-name">${p.name}</div>
+        <div class="profile-item-meta">${p.roaster} · ${p.events.length} events</div>
+      </div>
+      <button class="profile-item-delete" onclick="event.stopPropagation();deleteProfile('${p.id}')" title="Delete">✕</button>
+    </div>
+  `).join('');
+}
+
+function selectProfile(id) {
+  collectCurrentProfile();
+  selectedProfileId = id;
+  openEventIndexes.clear();
+  renderSidebar();
+  renderProfile(id);
+}
+
+function newProfile() {
+  collectCurrentProfile();
+  const id = 'profile_' + Date.now();
+  data.profiles.push({
+    id, name: 'New Profile', roaster: '',
+    events: [{
+      index: 0, trigger: { temperature: 370, unit: 'F', source: 'PID' },
+      type: 'action', phase: 'preheat', actions: [], estimated_time_seconds: 0
+    }]
+  });
+  selectedProfileId = id;
+  openEventIndexes.clear();
+  openEventIndexes.add(0);
+  renderSidebar();
+  renderProfile(id);
+  markDirty();
+}
+
+function deleteProfile(id) {
+  if (!confirm('Delete this profile? This cannot be undone.')) return;
+  data.profiles = data.profiles.filter(p => p.id !== id);
+  if (selectedProfileId === id) {
+    selectedProfileId = null;
+    document.getElementById('main').innerHTML = `
+      <div class="empty-state"><h2>Profile deleted</h2><p>Select another profile.</p></div>`;
+  }
+  renderSidebar();
+  markDirty();
+}
+
+// ── Profile editor ────────────────────────────────────────────────────────────
+function getProfile(id) { return data.profiles.find(p => p.id === id); }
+
+function collectCurrentProfile() {
+  if (!selectedProfileId) return;
+  const p = getProfile(selectedProfileId);
+  if (!p) return;
+  const nameEl = document.getElementById('pf-name');
+  const roasterEl = document.getElementById('pf-roaster');
+  if (nameEl) p.name = nameEl.value;
+  if (roasterEl) p.roaster = roasterEl.value;
+
+  p.events.forEach((ev, i) => {
+    const get = id => document.getElementById(id);
+    const tempEl = get(`ev-${i}-temp`);
+    const sourceEl = get(`ev-${i}-source`);
+    const phaseEl = get(`ev-${i}-phase`);
+    const timeEl = get(`ev-${i}-time`);
+
+    if (tempEl) ev.trigger.temperature = parseInt(tempEl.value) || 0;
+    if (sourceEl) ev.trigger.source = sourceEl.value;
+    if (phaseEl) ev.phase = phaseEl.value;
+    if (timeEl) ev.estimated_time_seconds = i === 0 ? 0 : mssToSeconds(timeEl.value);
+
+    if (ev.type === 'action') {
+      ev.actions = collectListItems(`ev-${i}-actions`);
+      ev.notes = collectListItems(`ev-${i}-notes`);
+      if (ev.notes.length === 0) delete ev.notes;
+    } else {
+      ev.info = collectListItems(`ev-${i}-info`);
+    }
+  });
+}
+
+function collectListItems(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return [];
+  return Array.from(container.querySelectorAll('input'))
+    .map(i => i.value.trim()).filter(Boolean);
+}
+
+function renderProfile(id) {
+  const p = getProfile(id);
+  document.getElementById('main').innerHTML = `
+    <div style="padding-bottom:80px">
+      <div class="profile-meta">
+        <div class="field">
+          <label>Profile Name</label>
+          <input id="pf-name" value="${p.name}" oninput="markDirty()" />
+        </div>
+        <div class="field">
+          <label>Roaster</label>
+          <input id="pf-roaster" value="${p.roaster}" oninput="markDirty()" />
+        </div>
+      </div>
+
+      <div class="events-header">
+        <h3>Events (${p.events.length})</h3>
+        <button class="btn btn-secondary btn-sm" onclick="addEvent()">+ Add Event</button>
+      </div>
+
+      <div id="eventList">
+        ${p.events.map((ev, i) => renderEventCard(ev, i, p.events.length)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderEventCard(ev, i, total) {
+  const isOpen = openEventIndexes.has(i);
+  const color = PHASE_COLORS[ev.phase] || '#3A3A3A';
+  const timeVal = i === 0 ? '0:00' : secondsToMSS(ev.estimated_time_seconds);
+  const timePlaceholder = i === 0 ? '0:00' : 'M:SS';
+  const timeReadonly = i === 0 ? 'readonly style="opacity:0.5"' : '';
+  const actionItems = ev.type === 'action' ? (ev.actions || []) : [];
+  const noteItems = ev.type === 'action' ? (ev.notes || []) : [];
+  const infoItems = ev.type === 'info' ? (ev.info || []) : [];
+
+  return `
+    <div class="event-card" id="eventCard-${i}">
+      <div class="event-card-header" onclick="toggleEvent(${i})">
+        <div class="event-index">${i}</div>
+        <div class="event-phase-dot" style="background:${color}"></div>
+        <div class="event-summary">
+          <div class="event-summary-title">${ev.trigger.temperature}°F (${ev.trigger.source}) — ${ev.phase}</div>
+          <div class="event-summary-meta">${ev.type === 'action' ? (ev.actions||[]).join(' · ') : (ev.info||[]).join(' · ')}</div>
+        </div>
+        <div class="event-card-actions" onclick="event.stopPropagation()">
+          ${i > 0 ? `<button onclick="moveEvent(${i},-1)" title="Move up">↑</button>` : ''}
+          ${i < total-1 ? `<button onclick="moveEvent(${i},1)" title="Move down">↓</button>` : ''}
+          <button class="del" onclick="deleteEvent(${i})" title="Delete">✕</button>
+        </div>
+      </div>
+
+      <div class="event-body ${isOpen ? 'open' : ''}" id="eventBody-${i}">
+        <div class="event-grid">
+          <div class="field">
+            <label>Temp (°F)</label>
+            <input id="ev-${i}-temp" type="number" value="${ev.trigger.temperature}" oninput="markDirty()" />
+          </div>
+          <div class="field">
+            <label>Source</label>
+            <select id="ev-${i}-source" onchange="markDirty()">
+              ${SOURCES.map(s => `<option ${ev.trigger.source===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Phase</label>
+            <select id="ev-${i}-phase" onchange="updatePhase(${i})">
+              ${PHASES.map(ph => `<option ${ev.phase===ph?'selected':''}>${ph}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Est. Time</label>
+            <input id="ev-${i}-time" value="${timeVal}" placeholder="${timePlaceholder}" ${timeReadonly} oninput="markDirty()" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="list-editor-label" style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:8px">Event Type</div>
+          <div class="type-toggle">
+            <button class="${ev.type==='action'?'active':''}" onclick="setEventType(${i},'action')">Action</button>
+            <button class="${ev.type==='info'?'active':''}" onclick="setEventType(${i},'info')">Info</button>
+          </div>
+        </div>
+
+        ${ev.type === 'action' ? `
+          <div class="list-editor">
+            <div class="list-editor-label">Actions</div>
+            <div id="ev-${i}-actions">
+              ${actionItems.map(a => listItemHTML(a)).join('')}
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="addListItem('ev-${i}-actions')">+ Add action</button>
+          </div>
+          <div class="list-editor" style="margin-top:16px">
+            <div class="list-editor-label">Notes (optional)</div>
+            <div id="ev-${i}-notes">
+              ${noteItems.map(n => listItemHTML(n)).join('')}
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="addListItem('ev-${i}-notes')">+ Add note</button>
+          </div>
+        ` : `
+          <div class="list-editor">
+            <div class="list-editor-label">Info lines</div>
+            <div id="ev-${i}-info">
+              ${infoItems.map(n => listItemHTML(n)).join('')}
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="addListItem('ev-${i}-info')">+ Add info line</button>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function listItemHTML(value='') {
+  return `<div class="list-item">
+    <input value="${value.replace(/"/g,'&quot;')}" oninput="markDirty()" />
+    <button onclick="this.parentElement.remove();markDirty()">✕</button>
+  </div>`;
+}
+
+// ── Event interactions ────────────────────────────────────────────────────────
+function toggleEvent(i) {
+  if (openEventIndexes.has(i)) openEventIndexes.delete(i);
+  else openEventIndexes.add(i);
+  const body = document.getElementById(`eventBody-${i}`);
+  if (body) body.classList.toggle('open');
+}
+
+function updatePhase(i) {
+  markDirty();
+  const sel = document.getElementById(`ev-${i}-phase`);
+  const dot = document.querySelector(`#eventCard-${i} .event-phase-dot`);
+  if (sel && dot) dot.style.background = PHASE_COLORS[sel.value] || '#3A3A3A';
+}
+
+function setEventType(i, type) {
+  collectCurrentProfile();
+  const p = getProfile(selectedProfileId);
+  const ev = p.events[i];
+  ev.type = type;
+  if (type === 'action') { ev.actions = ev.actions || []; delete ev.info; }
+  else { ev.info = ev.info || []; delete ev.actions; delete ev.notes; }
+  openEventIndexes.add(i);
+  renderProfile(selectedProfileId);
+  markDirty();
+}
+
+function addListItem(containerId) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.innerHTML = listItemHTML('');
+  container.appendChild(div.firstElementChild);
+  markDirty();
+}
+
+function addEvent() {
+  collectCurrentProfile();
+  const p = getProfile(selectedProfileId);
+  const i = p.events.length;
+  p.events.push({
+    index: i,
+    trigger: { temperature: 400, unit: 'F', source: 'ART' },
+    type: 'action', phase: 'development',
+    actions: [], estimated_time_seconds: null
+  });
+  openEventIndexes.add(i);
+  renderProfile(selectedProfileId);
+  markDirty();
+}
+
+function deleteEvent(i) {
+  if (!confirm('Delete this event?')) return;
+  collectCurrentProfile();
+  const p = getProfile(selectedProfileId);
+  p.events.splice(i, 1);
+  openEventIndexes.clear();
+  renderProfile(selectedProfileId);
+  markDirty();
+}
+
+function moveEvent(i, dir) {
+  collectCurrentProfile();
+  const p = getProfile(selectedProfileId);
+  const j = i + dir;
+  if (j < 0 || j >= p.events.length) return;
+  [p.events[i], p.events[j]] = [p.events[j], p.events[i]];
+  const wasOpen = openEventIndexes.has(i);
+  const otherOpen = openEventIndexes.has(j);
+  openEventIndexes.delete(i); openEventIndexes.delete(j);
+  if (wasOpen) openEventIndexes.add(j);
+  if (otherOpen) openEventIndexes.add(i);
+  renderProfile(selectedProfileId);
+  markDirty();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>

@@ -87,6 +87,16 @@ Example shape to add to each event in `roastProfiles.json`:
 
 ---
 
+## Standalone App Build (no WiFi / no Mac required)
+
+- [ ] Set up EAS Build (Expo's cloud build service — free tier)
+- [ ] Create a development build installable directly on iPhone (no App Store, no Expo Go)
+- [ ] App will open independently, fully offline
+- [ ] Reference: https://docs.expo.dev/build/introduction/
+- [ ] Prerequisite: Apple Developer account ($99/yr) needed for device installation
+
+---
+
 ## Tech Debt
 - [ ] Upgrade from Expo SDK 54 → SDK 56 (currently on 54 for Expo Go compatibility)
   - Requires: install Xcode for iOS Simulator, OR set up EAS Build
