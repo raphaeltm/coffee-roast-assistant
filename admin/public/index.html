@@ -173,8 +173,6 @@
   <span>Edits save directly to roastProfiles.json</span>
 </header>
 
-<datalist id="actionSuggestions"></datalist>
-
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -212,18 +210,6 @@ let data = null;
 let selectedProfileId = null;
 let openEventIndexes = new Set();
 
-// ── Action suggestions ────────────────────────────────────────────────────────
-function buildActionSuggestions() {
-  if (!data) return;
-  const seen = new Set();
-  data.profiles.forEach(p => p.events.forEach(ev => {
-    if (ev.type === 'action') (ev.actions || []).forEach(a => seen.add(a));
-  }));
-  const list = document.getElementById('actionSuggestions');
-  if (!list) return;
-  list.innerHTML = [...seen].sort().map(a => `<option value="${a.replace(/"/g,'&quot;')}"></option>`).join('');
-}
-
 // ── Time helpers ──────────────────────────────────────────────────────────────
 function secondsToMSS(s) {
   if (s === null || s === undefined || s === '') return '';
@@ -243,7 +229,6 @@ function mssToSeconds(str) {
 async function loadData() {
   const res = await fetch('/api/profiles');
   data = await res.json();
-  buildActionSuggestions();
   renderSidebar();
   if (selectedProfileId) renderProfile(selectedProfileId);
   else document.getElementById('main').innerHTML = `
@@ -259,7 +244,6 @@ async function saveData() {
   });
   const msg = document.getElementById('saveMsg');
   if (res.ok) {
-    buildActionSuggestions();
     msg.textContent = '✓ Saved to roastProfiles.json';
     msg.className = 'save-bar-msg saved';
     setTimeout(() => { msg.textContent = 'All changes saved.'; msg.className = 'save-bar-msg'; }, 3000);
@@ -498,10 +482,24 @@ function renderEventCard(ev, i, total) {
   `;
 }
 
+function getActionOptions() {
+  if (!data) return '';
+  const seen = new Set();
+  data.profiles.forEach(p => p.events.forEach(ev => {
+    if (ev.type === 'action') (ev.actions || []).forEach(a => seen.add(a));
+  }));
+  return [...seen].sort().map(a => `<option value="${a.replace(/"/g,'&quot;')}">${a}</option>`).join('');
+}
+
 function listItemHTML(value='', useDatalist=false) {
-  const datalist = useDatalist ? 'list="actionSuggestions"' : '';
+  const picker = useDatalist ? `
+    <select onchange="this.previousElementSibling.value=this.value;this.value='';markDirty()" style="background:#2a2a2a;border:1px solid #333;border-radius:6px;color:#aaa;padding:8px 6px;font-size:13px;cursor:pointer;flex-shrink:0">
+      <option value="">▾</option>
+      ${getActionOptions()}
+    </select>` : '';
   return `<div class="list-item">
-    <input value="${value.replace(/"/g,'&quot;')}" ${datalist} oninput="markDirty()" />
+    <input value="${value.replace(/"/g,'&quot;')}" oninput="markDirty()" />
+    ${picker}
     <button onclick="this.parentElement.remove();markDirty()">✕</button>
   </div>`;
 }
