@@ -4,7 +4,7 @@
     "principle": "temperature_driven_state_machine",
     "time_role": "advisory_only",
     "alert_threshold_seconds": 10,
-    "test_offset_seconds": 0
+    "test_offset_seconds": 290
   },
   "profiles": [
     {

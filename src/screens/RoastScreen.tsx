@@ -6,7 +6,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
 import { useRoastStore } from '../store/roastStore';
 import { PHASE_COLORS, PHASE_TEXT_COLORS, PHASE_LABELS } from '../utils/phaseColors';
 import { ActionEvent, InfoEvent } from '../types';
@@ -45,6 +48,23 @@ export default function RoastScreen({ navigation }: Props) {
   const canAdvance = currentEvent?.type === 'info' || actionsComplete;
 
   const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
+
+  // Fire haptic + sound once each time pre-alert becomes active
+  const prevPreAlert = useRef(false);
+  useEffect(() => {
+    if (preAlertActive && !prevPreAlert.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Audio.Sound.createAsync(
+        require('../../assets/alert.mp3'),
+        { shouldPlay: true, volume: 1.0 },
+      ).then(({ sound }) => {
+        sound.setOnPlaybackStatusUpdate(status => {
+          if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
+        });
+      }).catch(() => {/* silent fail */});
+    }
+    prevPreAlert.current = preAlertActive;
+  }, [preAlertActive]);
   const nextEstDisplay = nextEvent?.estimated_time_seconds != null
     ? formatTime(nextEvent.estimated_time_seconds)
     : null;
