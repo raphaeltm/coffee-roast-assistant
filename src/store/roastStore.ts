@@ -7,7 +7,7 @@ import {
   advanceToNextEvent,
   evaluatePreAlert,
 } from '../engine/roastEngine';
-import { alertThresholdSeconds } from '../data';
+import { alertThresholdSeconds, testOffsetSeconds } from '../data';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
@@ -68,7 +68,7 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
 
     // Start timer when leaving index 0 (first event confirmed)
     if (engineState.currentEventIndex === 0 && roastStartedAt === null) {
-      const now = Date.now();
+      const now = Date.now() - testOffsetSeconds * 1000;
       clearTimer();
       timerInterval = setInterval(() => {
         const { engineState: es, roastStartedAt: startedAt } = get();

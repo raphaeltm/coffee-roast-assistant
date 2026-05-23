@@ -45,6 +45,8 @@ export interface RoastProfilesData {
     time_role: string;
     /** Seconds before next estimated event to trigger pre-alert */
     alert_threshold_seconds: number;
+    /** Offset timer by this many seconds at start — for testing only, set to 0 in production */
+    test_offset_seconds: number;
   };
   profiles: RoastProfile[];
 }
