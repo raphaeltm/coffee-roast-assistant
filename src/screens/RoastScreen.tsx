@@ -33,6 +33,45 @@ export default function RoastScreen({ navigation }: Props) {
   const preAlertActive  = useRoastStore(s => s.preAlertActive);
   const secondsUntilNext = useRoastStore(s => s.secondsUntilNext);
 
+  // Derived values computed before hooks (use optional chaining for safety)
+  const currentEst = engineState?.currentEvent?.estimated_time_seconds ?? null;
+  const isOverdue = roastStartedAt !== null && currentEst !== null && elapsedSeconds > currentEst;
+  const shouldBlink = isOverdue || (currentEst === null && preAlertActive);
+
+  // Blink animation — must be before early return
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (shouldBlink) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(blinkAnim, { toValue: 0.15, duration: 500, useNativeDriver: true }),
+          Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ])
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      blinkAnim.setValue(1);
+    }
+  }, [shouldBlink]);
+
+  // Fire haptic + sound once each time pre-alert becomes active — must be before early return
+  const prevPreAlert = useRef(false);
+  useEffect(() => {
+    if (preAlertActive && !prevPreAlert.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Audio.Sound.createAsync(
+        require('../../assets/alert.mp3'),
+        { shouldPlay: true, volume: 1.0 },
+      ).then(({ sound }) => {
+        sound.setOnPlaybackStatusUpdate(status => {
+          if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
+        });
+      }).catch(() => {/* silent fail */});
+    }
+    prevPreAlert.current = preAlertActive;
+  }, [preAlertActive]);
+
   if (!engineState || !selectedProfile) return null;
 
   const { currentEvent, nextEvent, completedActions, isComplete } = engineState;
@@ -50,46 +89,7 @@ export default function RoastScreen({ navigation }: Props) {
 
   const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
 
-  // Current event estimated time
-  const currentEst = currentEvent?.estimated_time_seconds ?? null;
   const currentEstDisplay = currentEst !== null ? formatTime(currentEst) : '--:--';
-  const isOverdue = roastStartedAt !== null && currentEst !== null && elapsedSeconds > currentEst;
-  // Blink when overdue, or when time is unknown but next event is approaching
-  const shouldBlink = isOverdue || (currentEst === null && preAlertActive);
-
-  // Blink animation
-  const blinkAnim = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    if (shouldBlink) {
-      const loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(blinkAnim, { toValue: 0.15, duration: 500, useNativeDriver: true }),
-          Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-        ])
-      );
-      loop.start();
-      return () => loop.stop();
-    } else {
-      blinkAnim.setValue(1);
-    }
-  }, [shouldBlink]);
-
-  // Fire haptic + sound once each time pre-alert becomes active
-  const prevPreAlert = useRef(false);
-  useEffect(() => {
-    if (preAlertActive && !prevPreAlert.current) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Audio.Sound.createAsync(
-        require('../../assets/alert.mp3'),
-        { shouldPlay: true, volume: 1.0 },
-      ).then(({ sound }) => {
-        sound.setOnPlaybackStatusUpdate(status => {
-          if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
-        });
-      }).catch(() => {/* silent fail */});
-    }
-    prevPreAlert.current = preAlertActive;
-  }, [preAlertActive]);
 
   function handleExit() {
     resetRoast();
@@ -211,7 +211,7 @@ export default function RoastScreen({ navigation }: Props) {
         {preAlertActive && secondsUntilNext !== null && (
           <View style={styles.preAlertBanner}>
             <Text style={styles.preAlertText}>
-              ⏱ Next step in ~{secondsUntilNext}s
+              ⏱ Trigger in ~{secondsUntilNext}s
             </Text>
           </View>
         )}

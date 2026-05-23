@@ -76,7 +76,7 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const { preAlertActive, secondsUntilNext } = evaluatePreAlert(
           elapsed,
-          es?.nextEvent ?? null,
+          es?.currentEvent ?? null,
           alertThresholdSeconds,
         );
         set({ elapsedSeconds: elapsed, preAlertActive, secondsUntilNext });

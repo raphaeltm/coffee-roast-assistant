@@ -28,45 +28,19 @@
 
 ---
 
-## Phase 1 — MVP 2 (pick up here tomorrow)
+## Phase 1 — MVP 2 ✅
 
-### Goal
-Start a timer when the roast begins (first event checkboxes confirmed at 370°F PID),
-then warn the roaster ~10 seconds before the estimated time of the next event.
-
-### What needs to happen
-
-#### 1. Add estimated times to the JSON
-Each event needs an `estimated_time_seconds` field (time elapsed from roast start).
-These values need to be researched/estimated based on typical roast curves.
-
-Example shape to add to each event in `roastProfiles.json`:
-```json
-"estimated_time_seconds": 120
-```
-
-#### 2. Build a timer in the engine/store
-- Record `roastStartedAt: number` (unix ms) when first event is confirmed
-- Each tick, calculate `elapsedSeconds = (Date.now() - roastStartedAt) / 1000`
-- Compare elapsed against next event's `estimated_time_seconds`
-- If within 10 seconds of next event → trigger pre-alert
-
-#### 3. Pre-alert UI
-- Show a warning banner: "Next step in ~Xs"
-- Sound alert (expo-av or expo-haptics)
-- Haptic feedback
-- IMPORTANT: Pre-alerts must NEVER auto-advance the step — temperature/manual only
-
-#### 4. Timer display (advisory)
-- Show elapsed time since roast start somewhere on the RoastScreen
-- Label it clearly as advisory (not a trigger)
-
-### Files to touch
-- `src/data/roastProfiles.json` — add `estimated_time_seconds` to all events
-- `src/types/index.ts` — add optional `estimated_time_seconds` to event interface
-- `src/engine/roastEngine.ts` — add timer evaluation logic
-- `src/store/roastStore.ts` — add `roastStartedAt`, timer interval, pre-alert state
-- `src/screens/RoastScreen.tsx` — add elapsed display + pre-alert banner
+### Completed
+- [x] `estimated_time_seconds` added to all events in all profiles
+- [x] Timer starts when leaving index 0 (preheat confirmed); `roastStartedAt` recorded in store
+- [x] `test_offset_seconds` in JSON meta — simulates being mid-roast for faster testing
+- [x] Elapsed timer displayed in phase bar alongside current step's estimated time
+- [x] Overdue indicator — current step blinks red when elapsed > estimated time
+- [x] Pre-alert fires 10s before current step's estimated time: haptic + sound + amber banner
+- [x] Pre-alert fires based on **current** event's time (not next event's)
+- [x] Pre-alert clears immediately on "Next →" tap
+- [x] Alert sound: `assets/alert.mp3` via expo-av
+- [x] All React hooks moved before early return (Rules of Hooks fix)
 
 ---
 
