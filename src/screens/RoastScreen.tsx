@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useRef } from 'react';
@@ -49,6 +50,30 @@ export default function RoastScreen({ navigation }: Props) {
 
   const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
 
+  // Current event estimated time
+  const currentEst = currentEvent?.estimated_time_seconds ?? null;
+  const currentEstDisplay = currentEst !== null ? formatTime(currentEst) : '--:--';
+  const isOverdue = roastStartedAt !== null && currentEst !== null && elapsedSeconds > currentEst;
+  // Blink when overdue, or when time is unknown but next event is approaching
+  const shouldBlink = isOverdue || (currentEst === null && preAlertActive);
+
+  // Blink animation
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (shouldBlink) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(blinkAnim, { toValue: 0.15, duration: 500, useNativeDriver: true }),
+          Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ])
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      blinkAnim.setValue(1);
+    }
+  }, [shouldBlink]);
+
   // Fire haptic + sound once each time pre-alert becomes active
   const prevPreAlert = useRef(false);
   useEffect(() => {
@@ -65,9 +90,6 @@ export default function RoastScreen({ navigation }: Props) {
     }
     prevPreAlert.current = preAlertActive;
   }, [preAlertActive]);
-  const nextEstDisplay = nextEvent?.estimated_time_seconds != null
-    ? formatTime(nextEvent.estimated_time_seconds)
-    : null;
 
   function handleExit() {
     resetRoast();
@@ -83,11 +105,15 @@ export default function RoastScreen({ navigation }: Props) {
         </Text>
         {timerDisplay && (
           <View style={styles.timerGroup}>
-            {nextEstDisplay && (
-              <Text style={[styles.nextEstDisplay, { color: preAlertActive ? '#FFB347' : phaseTextColor }]}>
-                {nextEstDisplay}
-              </Text>
-            )}
+            <Animated.Text style={[
+              styles.currentEstDisplay,
+              { opacity: blinkAnim },
+              isOverdue && { color: '#FF4444', fontWeight: '800' },
+              (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
+              (!isOverdue && currentEst !== null) && { color: phaseTextColor },
+            ]}>
+              {currentEstDisplay}
+            </Animated.Text>
             <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
               ▶ {timerDisplay}
             </Text>
@@ -224,7 +250,7 @@ const styles = StyleSheet.create({
   },
   phaseLabel: { fontSize: 16, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
   timerGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  nextEstDisplay: { fontSize: 13, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
+  currentEstDisplay: { fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
   timerDisplay: { fontSize: 14, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
   stepCounter: { fontSize: 14, opacity: 0.8 },
 
@@ -312,6 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E67E22',
+    opacity: 0.45,
   },
   preAlertText: {
     color: '#FFB347',
