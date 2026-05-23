@@ -207,24 +207,27 @@ export default function RoastScreen({ navigation }: Props) {
           </View>
         )}
 
-        {/* Pre-alert banner */}
-        {preAlertActive && secondsUntilNext !== null && (
-          <View style={styles.preAlertBanner}>
-            <Text style={styles.preAlertText}>
-              ⏱ Trigger in ~{secondsUntilNext}s
-            </Text>
-          </View>
-        )}
-
         {/* Next button */}
         {!isComplete && (
           <TouchableOpacity
-            style={[styles.nextButton, !canAdvance && styles.nextButtonDisabled]}
+            style={[
+              styles.nextButton,
+              !canAdvance && !preAlertActive && styles.nextButtonDisabled,
+              preAlertActive && styles.nextButtonAlert,
+            ]}
             onPress={advanceEvent}
             disabled={!canAdvance}
           >
-            <Text style={[styles.nextButtonText, !canAdvance && styles.nextButtonTextDisabled]}>
-              {canAdvance ? 'Next →' : 'Check all actions to continue'}
+            <Text style={[
+              styles.nextButtonText,
+              !canAdvance && !preAlertActive && styles.nextButtonTextDisabled,
+              preAlertActive && styles.nextButtonTextAlert,
+            ]}>
+              {preAlertActive && secondsUntilNext !== null
+                ? `⏱ Engage in ~${secondsUntilNext}s${canAdvance ? ' — Next →' : ''}`
+                : !canAdvance
+                  ? 'Check all actions to continue'
+                  : 'Next →'}
             </Text>
           </TouchableOpacity>
         )}
@@ -320,6 +323,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
   },
+  nextButtonAlert: {
+    backgroundColor: '#7C4A00',
+    borderWidth: 1,
+    borderColor: '#E67E22',
+  },
+  nextButtonTextAlert: {
+    color: '#FFB347',
+    fontSize: 18,
+    fontWeight: '700',
+  },
 
   completeCard: {
     backgroundColor: '#1E3A1E',
@@ -331,20 +344,6 @@ const styles = StyleSheet.create({
   completeEmoji: { fontSize: 48 },
   completeText: { color: '#4ADE80', fontSize: 24, fontWeight: '700' },
 
-  preAlertBanner: {
-    backgroundColor: '#7C4A00',
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E67E22',
-    opacity: 0.45,
-  },
-  preAlertText: {
-    color: '#FFB347',
-    fontSize: 16,
-    fontWeight: '700',
-  },
   exitButton: {
     padding: 18,
     borderRadius: 16,
