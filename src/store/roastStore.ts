@@ -81,13 +81,13 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
         );
         set({ elapsedSeconds: elapsed, preAlertActive, secondsUntilNext });
       }, 1000);
-      set({ engineState: newEngineState, roastStartedAt: now });
+      set({ engineState: newEngineState, roastStartedAt: now, preAlertActive: false, secondsUntilNext: null });
       return;
     }
 
-    set({ engineState: newEngineState });
+    // Clear pre-alert immediately on advance so banner doesn't linger
+    set({ engineState: newEngineState, preAlertActive: false, secondsUntilNext: null });
 
-    // Stop timer when roast is complete
     if (newEngineState.isComplete) clearTimer();
   },
 

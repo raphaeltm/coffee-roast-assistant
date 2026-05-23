@@ -45,6 +45,9 @@ export default function RoastScreen({ navigation }: Props) {
   const canAdvance = currentEvent?.type === 'info' || actionsComplete;
 
   const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
+  const nextEstDisplay = nextEvent?.estimated_time_seconds != null
+    ? formatTime(nextEvent.estimated_time_seconds)
+    : null;
 
   function handleExit() {
     resetRoast();
@@ -59,9 +62,16 @@ export default function RoastScreen({ navigation }: Props) {
           {PHASE_LABELS[phase]}
         </Text>
         {timerDisplay && (
-          <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
-            ▶ {timerDisplay}
-          </Text>
+          <View style={styles.timerGroup}>
+            {nextEstDisplay && (
+              <Text style={[styles.nextEstDisplay, { color: preAlertActive ? '#FFB347' : phaseTextColor }]}>
+                {nextEstDisplay}
+              </Text>
+            )}
+            <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
+              ▶ {timerDisplay}
+            </Text>
+          </View>
         )}
         <Text style={[styles.stepCounter, { color: phaseTextColor }]}>
           {stepNumber} / {totalEvents}
@@ -193,6 +203,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   phaseLabel: { fontSize: 16, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  timerGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  nextEstDisplay: { fontSize: 13, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
   timerDisplay: { fontSize: 14, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
   stepCounter: { fontSize: 14, opacity: 0.8 },
 
