@@ -41,6 +41,10 @@
 - [x] Pre-alert clears immediately on "Next →" tap
 - [x] Alert sound: `assets/alert.mp3` via expo-av
 - [x] All React hooks moved before early return (Rules of Hooks fix)
+- [x] Settings screen — alert threshold (5/10/15/20/30s) + sound picker (7 options, previews on tap)
+- [x] 6 roaster-appropriate alert sounds in assets/sounds/ (woodblock, wood pop, click/snap, clave, bell ×2)
+- [x] Sound preference persisted via AsyncStorage; threshold stored in Zustand
+- [x] ⚙️ gear icon on profile select screen navigates to Settings
 
 ---
 
