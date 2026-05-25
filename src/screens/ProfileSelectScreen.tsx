@@ -35,6 +35,9 @@ export default function ProfileSelectScreen({ navigation }: Props) {
           style={styles.watermark}
         />
       </View>
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+        <Text style={styles.settingsIcon}>⚙️</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Buongiorno</Text>
       <Text style={styles.subtitle}>Select a roast profile</Text>
 
@@ -93,7 +96,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   card: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#36363695',
     borderRadius: 16,
     padding: 24,
     flexDirection: 'row',
@@ -113,5 +116,15 @@ const styles = StyleSheet.create({
   cardArrow: {
     fontSize: 20,
     color: '#555',
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: 16,
+    right: 20,
+    zIndex: 10,
+    padding: 8,
+  },
+  settingsIcon: {
+    fontSize: 22,
   },
 });

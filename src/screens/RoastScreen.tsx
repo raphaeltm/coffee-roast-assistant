@@ -17,12 +17,14 @@ import { ActionEvent, InfoEvent } from '../types';
 import { areActionsComplete } from '../engine/roastEngine';
 import { formatTime } from '../utils/formatTime';
 import { RootStackParamList } from '../../App';
+import { useSoundPreference } from '../hooks/useSoundPreference';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Roast'>;
 };
 
 export default function RoastScreen({ navigation }: Props) {
+  const { currentOption } = useSoundPreference();
   const engineState     = useRoastStore(s => s.engineState);
   const selectedProfile = useRoastStore(s => s.selectedProfile);
   const toggleAction    = useRoastStore(s => s.toggleAction);
@@ -60,14 +62,16 @@ export default function RoastScreen({ navigation }: Props) {
   useEffect(() => {
     if (preAlertActive && !prevPreAlert.current) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Audio.Sound.createAsync(
-        require('../../assets/alert.mp3'),
-        { shouldPlay: true, volume: 1.0 },
-      ).then(({ sound }) => {
-        sound.setOnPlaybackStatusUpdate(status => {
-          if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
-        });
-      }).catch(() => {/* silent fail */});
+      if (currentOption.require !== null) {
+        Audio.Sound.createAsync(
+          currentOption.require,
+          { shouldPlay: true, volume: 1.0 },
+        ).then(({ sound }) => {
+          sound.setOnPlaybackStatusUpdate(status => {
+            if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
+          });
+        }).catch(() => {/* silent fail */});
+      }
     }
     prevPreAlert.current = preAlertActive;
   }, [preAlertActive]);

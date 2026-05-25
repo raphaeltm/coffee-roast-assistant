@@ -7,7 +7,7 @@ import {
   advanceToNextEvent,
   evaluatePreAlert,
 } from '../engine/roastEngine';
-import { alertThresholdSeconds, testOffsetSeconds } from '../data';
+import { alertThresholdSeconds as DEFAULT_ALERT_THRESHOLD, testOffsetSeconds } from '../data';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
@@ -18,6 +18,10 @@ interface RoastStore {
   elapsedSeconds: number;
   preAlertActive: boolean;
   secondsUntilNext: number | null;
+
+  // Settings
+  alertThresholdSeconds: number;
+  setAlertThreshold: (seconds: number) => void;
 
   selectProfile: (profile: RoastProfile) => void;
   startRoast: () => void;
@@ -42,6 +46,8 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   elapsedSeconds: 0,
   preAlertActive: false,
   secondsUntilNext: null,
+  alertThresholdSeconds: DEFAULT_ALERT_THRESHOLD,
+  setAlertThreshold: (seconds) => set({ alertThresholdSeconds: seconds }),
 
   selectProfile: (profile) => {
     clearTimer();
@@ -71,13 +77,13 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
       const now = Date.now() - testOffsetSeconds * 1000;
       clearTimer();
       timerInterval = setInterval(() => {
-        const { engineState: es, roastStartedAt: startedAt } = get();
+        const { engineState: es, roastStartedAt: startedAt, alertThresholdSeconds: threshold } = get();
         if (!startedAt) return;
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const { preAlertActive, secondsUntilNext } = evaluatePreAlert(
           elapsed,
           es?.currentEvent ?? null,
-          alertThresholdSeconds,
+          threshold,
         );
         set({ elapsedSeconds: elapsed, preAlertActive, secondsUntilNext });
       }, 1000);
