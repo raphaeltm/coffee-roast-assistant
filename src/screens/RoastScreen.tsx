@@ -93,7 +93,16 @@ export default function RoastScreen({ navigation }: Props) {
 
   const timerDisplay = roastStartedAt !== null ? formatTime(elapsedSeconds) : null;
 
-  const currentEstDisplay = currentEst !== null ? formatTime(currentEst) : '--:--';
+  const currentEstDisplay = currentEst !== null ? formatTime(currentEst) : '--:--'; 
+  // Time remaining = est - elapsed (negative means overdue)
+  const timeRemaining = roastStartedAt !== null && currentEst !== null
+    ? currentEst - elapsedSeconds
+    : null;
+  const timeRemainingDisplay = timeRemaining !== null
+    ? (timeRemaining < 0 ? `-${formatTime(Math.abs(timeRemaining))}` : formatTime(timeRemaining))
+    : '--:--';
+
+  const profileShort = (selectedProfile.name ?? '').slice(0, 8);
 
   function handleExit() {
     resetRoast();
@@ -111,20 +120,19 @@ export default function RoastScreen({ navigation }: Props) {
           <View style={styles.timerGroup}>
             <Animated.Text style={[
               styles.currentEstDisplay,
-              { opacity: blinkAnim },
+              { color: phaseTextColor, opacity: blinkAnim },
               isOverdue && { color: '#FF4444', fontWeight: '800' },
               (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
-              (!isOverdue && currentEst !== null) && { color: phaseTextColor },
             ]}>
               {currentEstDisplay}
-            </Animated.Text>
-            <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
-              ▶ {timerDisplay}
-            </Text>
+            </Animated.Text>          
+          <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
+            ▶ {timerDisplay}
+          </Text>
           </View>
         )}
-        <Text style={[styles.stepCounter, { color: phaseTextColor }]}>
-          {stepNumber} / {totalEvents}
+        <Text style={[styles.profileName, { color: phaseTextColor }]}>
+          {profileShort}
         </Text>
       </View>
 
@@ -135,12 +143,38 @@ export default function RoastScreen({ navigation }: Props) {
           <View style={styles.eventCard}>
             {/* Temperature reference (informational only in MVP 1) */}
             <View style={[styles.tempBadge, { backgroundColor: phaseColor }]}>
-              <Text style={[styles.tempLabel, { color: phaseTextColor }]}>
-                {currentEvent.trigger.source} reference
-              </Text>
-              <Text style={[styles.tempValue, { color: phaseTextColor }]}>
-                {currentEvent.trigger.temperature}°{currentEvent.trigger.unit}
-              </Text>
+              <View style={styles.tempBadgeRow}>
+                {/* Time remaining — left */}
+                <View style={styles.tempBadgeSide}>
+                  <Animated.Text style={[
+                    styles.tempSideValue,
+                    { color: phaseTextColor, opacity: blinkAnim },
+                    isOverdue && { color: '#FF4444', fontWeight: '800' },
+                    (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
+                  ]}>
+                    {timeRemainingDisplay}
+                  </Animated.Text>
+                  <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>remaining</Text>
+                </View>
+
+                {/* Temp — centre */}
+                <View style={styles.tempBadgeCenter}>
+                  <Text style={[styles.tempLabel, { color: phaseTextColor }]}>
+                    {currentEvent.trigger.source} ref
+                  </Text>
+                  <Text style={[styles.tempValue, { color: phaseTextColor }]}>
+                    {currentEvent.trigger.temperature}°{currentEvent.trigger.unit}
+                  </Text>
+                </View>
+
+                {/* Step counter — right */}
+                <View style={styles.tempBadgeSide}>
+                  <Text style={[styles.tempSideValue, { color: phaseTextColor }]}>
+                    {stepNumber}/{totalEvents}
+                  </Text>
+                  <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>step</Text>
+                </View>
+              </View>
             </View>
 
             {/* Action checkboxes */}
@@ -259,7 +293,7 @@ const styles = StyleSheet.create({
   timerGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   currentEstDisplay: { fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
   timerDisplay: { fontSize: 14, fontWeight: '600', opacity: 0.85, fontVariant: ['tabular-nums'] },
-  stepCounter: { fontSize: 14, opacity: 0.8 },
+  profileName: { fontSize: 13, fontWeight: '600', opacity: 0.8 },
 
   scroll: { padding: 20, gap: 16 },
 
@@ -269,11 +303,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   tempBadge: {
-    padding: 28,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  tempBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tempBadgeSide: {
+    width: 72,
     alignItems: 'center',
   },
+  tempBadgeCenter: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  tempSideValue: { fontSize: 17, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  tempSideLabel: { fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.8, opacity: 0.7, marginTop: 2 },
   tempLabel: { fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, opacity: 0.8 },
-  tempValue: { fontSize: 58, fontWeight: '800', marginTop: 4 },
+  tempValue: { fontSize: 52, fontWeight: '800', marginTop: 4 },
 
   actionList: { padding: 24, gap: 18 },
   sectionTitle: { color: '#888', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
