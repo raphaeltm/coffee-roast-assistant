@@ -140,7 +140,7 @@ export default function RoastScreen({ navigation }: Props) {
 
         {/* Current event */}
         {currentEvent && !isComplete && (
-          <View style={styles.eventCard}>
+          <View style={[styles.eventCard, styles.eventCardMain]}>
             {/* Temperature reference (informational only in MVP 1) */}
             <View style={[styles.tempBadge, { backgroundColor: phaseColor }]}>
               <View style={styles.tempBadgeRow}>
@@ -302,9 +302,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
+  eventCardMain: {
+    minHeight: '48%',
+  },
   tempBadge: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    paddingVertical: 36,
+    paddingHorizontal: 11,
   },
   tempBadgeRow: {
     flexDirection: 'row',

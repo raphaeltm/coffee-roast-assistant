@@ -4,7 +4,7 @@ export const PHASE_COLORS: Record<RoastPhase, string> = {
   preheat:     '#3A3A3A',
   drying:      '#3B82F6',
   maillard:    '#EAB308',
-  development: '#EF4444',
+  development: '#4e0065',
   end:         '#3A3A3A',
 };
 
