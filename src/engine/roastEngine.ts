@@ -38,6 +38,9 @@ export function createInitialEngineState(profile: RoastProfile): EngineState {
  * Evaluates the current temperature against the profile and returns
  * the active and next events. This is the core of the state machine —
  * temperature is the only trigger for progression.
+ *
+ * Phase 3: replace `currentTemp` with `provider.getBT()` from ArtisanProvider.
+ * See src/engine/temperatureProvider.ts.
  */
 export function evaluateTemperature(
   profile: RoastProfile,
