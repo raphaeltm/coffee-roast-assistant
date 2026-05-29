@@ -232,6 +232,18 @@ block the iPhone, which is a different machine. Instead, either:
   (the bridge rejects connections without the matching token), and/or
 - Firewall port 8765 so only the iPhone's IP can reach it.
 
+### Remote access / tunnelling
+
+To reach the bridge from outside the roastery Wi-Fi, or to get a stable address
+with TLS (`wss://`, which also avoids the iOS App Transport Security block on
+cleartext `ws://`), see [REMOTE_ACCESS.md](REMOTE_ACCESS.md). It compares
+Tailscale Funnel (stable public URL + automatic TLS), Tailscale Serve (private),
+and Cloudflare Tunnel, all paired with `BRIDGE_TOKEN`.
+
+Note the token is currently read from the URL query string (`?token=`). For a
+publicly-exposed endpoint, consider moving it to the `Sec-WebSocket-Protocol`
+header or a first-message handshake so it can't be logged by a tunnel provider.
+
 ---
 
 ## Prototype / automated tests
@@ -254,10 +266,11 @@ mid-stream disconnect. See `proto/README.md` for details.
 
 ```
 bridge/
-├── bridge.py       ← the bridge (Option A: run directly)
-├── README.md       ← end-user setup guide
-├── DEVELOPER.md    ← this file
-└── proto/          ← Node end-to-end test harness (mock Artisan + mock app)
+├── bridge.py         ← the bridge (Option A: run directly)
+├── README.md         ← end-user setup guide
+├── DEVELOPER.md      ← this file
+├── REMOTE_ACCESS.md  ← tunnelling: Tailscale Funnel/Serve, Cloudflare, auth
+└── proto/            ← Node end-to-end test harness (mock Artisan + mock app)
     ├── mock_artisan.js
     ├── mock_iphone.js
     ├── run-tests.js

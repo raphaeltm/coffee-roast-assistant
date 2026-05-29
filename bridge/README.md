@@ -138,6 +138,10 @@ previous state.
 **Tip:** Assign a static local IP to the laptop in your router settings to
 avoid needing to update the IP in the app.
 
+**Remote access (off the roastery Wi-Fi) or a stable TLS address?** See
+[REMOTE_ACCESS.md](REMOTE_ACCESS.md) — covers Tailscale Funnel/Serve, Cloudflare
+Tunnel, and the shared-secret (`BRIDGE_TOKEN`) auth.
+
 ---
 
 ## Complete removal
