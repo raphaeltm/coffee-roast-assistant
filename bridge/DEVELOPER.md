@@ -48,9 +48,27 @@ them differently — Artisan is a sender, iPhone is a receiver.
 | `bt`  | Artisan `{BT}` placeholder | °F |
 | `et`  | Artisan `{ET}` placeholder | °F |
 | `t`   | Artisan `{t}` placeholder (elapsed) | seconds |
-| `ror` | Computed by bridge from BT delta | °F/min |
+| `ror` | Least-squares slope over a time window (default 15s) | °F/min |
 
-Any field is `null` if Artisan did not send it or data is insufficient.
+Any field is `null` if Artisan did not send it, the value was non-numeric
+(Artisan emits `"-"`/`""` for a channel before probes settle), or there isn't
+yet enough data to compute it. The relay never crashes on a bad field.
+
+---
+
+## Configuration (optional environment variables)
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `BRIDGE_HOST` | `0.0.0.0` | Bind address |
+| `BRIDGE_PORT` | `8765` | Port |
+| `BRIDGE_TOKEN` | _(unset)_ | If set, clients must connect with `?token=...` |
+| `BRIDGE_ROR_WINDOW` | `15` | RoR window in seconds |
+| `BRIDGE_LOG_FILE` | _(unset)_ | If set, also append logs to this file |
+
+RoR history is cleared automatically when Artisan reconnects or when a new
+roast starts (detected by the elapsed counter resetting), so one roast never
+inherits the previous roast's beans temperature.
 
 ---
 
@@ -200,14 +218,35 @@ The bridge never affects Artisan's ability to record the roast.
 
 ## Security
 
-- The bridge listens on `0.0.0.0:8765` — accessible on the local network only
-- No authentication (not needed for a closed roastery Wi-Fi)
-- No internet connection required or made
-- No data is stored or logged by the bridge
+- The bridge listens on `0.0.0.0:8765` — reachable by any device on the same
+  network (necessary, since the iPhone is a separate device)
+- No internet connection is required or made; nothing leaves the LAN
+- Logging is to the console only unless `BRIDGE_LOG_FILE` is set; no roast data
+  is persisted
 
-If the roastery Wi-Fi is shared with customers, consider binding to
-`127.0.0.1` instead and using a VPN or SSH tunnel for the iPhone connection —
-but this is very unlikely to be necessary.
+For a closed roastery Wi-Fi, no authentication is needed. If the network is
+shared (e.g. with customers), do **not** bind to `127.0.0.1` — that would also
+block the iPhone, which is a different machine. Instead, either:
+
+- Set `BRIDGE_TOKEN=<secret>` and have the app connect with `?token=<secret>`
+  (the bridge rejects connections without the matching token), and/or
+- Firewall port 8765 so only the iPhone's IP can reach it.
+
+---
+
+## Prototype / automated tests
+
+`proto/` contains a Node-based end-to-end harness that runs the real bridge
+against simulated Artisan and app clients — no roaster or iPhone required.
+
+```
+cd proto && npm install
+node run-tests.js
+```
+
+It covers: happy-path flow, the path-routing regression (original vs fixed),
+junk-reading resilience, RoR accuracy, and multi-client fan-out with a
+mid-stream disconnect. See `proto/README.md` for details.
 
 ---
 
@@ -217,5 +256,10 @@ but this is very unlikely to be necessary.
 bridge/
 ├── bridge.py       ← the bridge (Option A: run directly)
 ├── README.md       ← end-user setup guide
-└── DEVELOPER.md    ← this file
+├── DEVELOPER.md    ← this file
+└── proto/          ← Node end-to-end test harness (mock Artisan + mock app)
+    ├── mock_artisan.js
+    ├── mock_iphone.js
+    ├── run-tests.js
+    └── README.md
 ```

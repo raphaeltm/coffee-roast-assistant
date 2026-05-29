@@ -97,13 +97,16 @@ python bridge.py
 A small console window appears showing the bridge status:
 
 ```
-[bridge] Listening on ws://0.0.0.0:8765
-[bridge] Waiting for Artisan...
-[bridge] Artisan connected
-[bridge] iPhone connected — streaming live data
+12:00:00 [bridge] E46 Roast Assistant — Artisan Bridge
+12:00:00 [bridge] Artisan  -> ws://localhost:8765/artisan
+12:00:00 [bridge] App      -> ws://<this-laptop-ip>:8765/
+12:00:00 [bridge] RoR window: 15s
+12:00:00 [bridge] listening on ws://0.0.0.0:8765  (Ctrl+C to stop)
+12:00:05 [bridge] Artisan connected (('127.0.0.1', 54012))
+12:00:07 [bridge] app client connected — 1 client(s)
 ```
 
-Close the console window to stop the bridge. Nothing persists.
+Close the console window (or press Ctrl+C) to stop the bridge. Nothing persists.
 
 ---
 
