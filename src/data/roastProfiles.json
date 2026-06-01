@@ -1,0 +1,1127 @@
+{
+  "meta": {
+    "model_version": "1.0",
+    "principle": "temperature_driven_state_machine",
+    "time_role": "advisory_only",
+    "alert_threshold_seconds": 10,
+    "test_offset_seconds": 0
+  },
+  "profiles": [
+    {
+      "id": "prato",
+      "name": "Prato",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 270,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 314
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 300,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 372
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 320,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 415
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2",
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 547
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 408,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 688
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 417,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 733
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 429,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 792
+        }
+      ],
+      "recipe": "20 lbs ->\n15 GUAT, \n5 BRAZ",
+      "dtp_target": 23.6
+    },
+    {
+      "id": "e46",
+      "name": "E46",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 275,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🌬 Air 1 (50/50)",
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 305
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 320,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 393
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2",
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 520
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 410,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 657
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 418,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 690
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 432,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 753
+        }
+      ],
+      "recipe": "18 lbs -> \n10 lbs SHB GUAT\n5 lbs BRAZ\n3 lbs GUJI",
+      "dtp_target": 23.8
+    },
+    {
+      "id": "profile_1779470243319",
+      "name": "J Hill - El Salvador",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 250,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 274
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 275,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 324
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 300,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 386
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 350,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2"
+          ],
+          "estimated_time_seconds": 533
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 609
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 416,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 842
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 428,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 902
+        },
+        {
+          "index": 10,
+          "trigger": {
+            "temperature": 437,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 957
+        }
+      ],
+      "recipe": "18 lbs",
+      "dtp_target": 28
+    },
+    {
+      "id": "profile_1780267446042",
+      "name": "Guji - Grade 1",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 275,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🔥 Gas 4",
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 325
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 320,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 428
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 350,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2"
+          ],
+          "estimated_time_seconds": 507
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 574
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 400,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 672
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 415,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 720
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 422,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 762
+        }
+      ],
+      "recipe": "18 lbs",
+      "dtp_target": 16.5
+    },
+    {
+      "id": "profile_1780268969573",
+      "name": "Benchmark",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 275,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🔥 Gas 4",
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 332
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 320,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 410
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 350,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2"
+          ],
+          "estimated_time_seconds": 525
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 599
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 400,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 705
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 415,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 782
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 426,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 877
+        }
+      ],
+      "recipe": "20 lbs ->\n12 GUAT, \n4 COSTA, \n4 SUM",
+      "dtp_target": 24
+    },
+    {
+      "id": "profile_1780316459682",
+      "name": "Defat - SWP Braz",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 250,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 259
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 270,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 294
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 300,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 346
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 350,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2"
+          ],
+          "estimated_time_seconds": 463
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 526
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 400,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 627
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 415,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 691
+        },
+        {
+          "index": 10,
+          "trigger": {
+            "temperature": 427,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 782
+        }
+      ],
+      "recipe": "18 lbs",
+      "dtp_target": 25.1
+    },
+    {
+      "id": "profile_1780344374391",
+      "name": "Columbian (New)",
+      "roaster": "E46",
+      "events": [
+        {
+          "index": 0,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "preheat",
+          "actions": [
+            "🔥 Gas 5",
+            "💻 Start ART"
+          ],
+          "estimated_time_seconds": 0
+        },
+        {
+          "index": 1,
+          "trigger": {
+            "temperature": 405,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🫘 Charge Beans"
+          ],
+          "notes": [
+            "Charge causes expected temperature drop"
+          ],
+          "estimated_time_seconds": null
+        },
+        {
+          "index": 2,
+          "trigger": {
+            "temperature": 270,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "drying",
+          "actions": [
+            "🌬 Air 1 (50/50)"
+          ],
+          "estimated_time_seconds": 329
+        },
+        {
+          "index": 3,
+          "trigger": {
+            "temperature": 300,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 4"
+          ],
+          "estimated_time_seconds": 399
+        },
+        {
+          "index": 4,
+          "trigger": {
+            "temperature": 330,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 3"
+          ],
+          "estimated_time_seconds": 470
+        },
+        {
+          "index": 5,
+          "trigger": {
+            "temperature": 370,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "maillard",
+          "actions": [
+            "🔥 Gas 2",
+            "🌬 Air 100% Drum (A2)"
+          ],
+          "estimated_time_seconds": 590
+        },
+        {
+          "index": 6,
+          "trigger": {
+            "temperature": 389,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "info",
+          "phase": "development",
+          "info": [
+            "First Crack begins",
+            "Development phase active"
+          ],
+          "estimated_time_seconds": null,
+          "hidden": true
+        },
+        {
+          "index": 7,
+          "trigger": {
+            "temperature": 400,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas 1"
+          ],
+          "estimated_time_seconds": 687
+        },
+        {
+          "index": 8,
+          "trigger": {
+            "temperature": 412,
+            "unit": "F",
+            "source": "ART"
+          },
+          "type": "action",
+          "phase": "development",
+          "actions": [
+            "🔥 Gas OFF"
+          ],
+          "estimated_time_seconds": 738
+        },
+        {
+          "index": 9,
+          "trigger": {
+            "temperature": 418,
+            "unit": "F",
+            "source": "PID"
+          },
+          "type": "action",
+          "phase": "end",
+          "actions": [
+            "🫘 Drop Beans",
+            "🌬 Move to Cooling Tray",
+            "⏹ Stop ART / ROR Recording"
+          ],
+          "estimated_time_seconds": 789
+        }
+      ],
+      "recipe": "20 lbs",
+      "dtp_target": 18
+    }
+  ]
+}
