@@ -19,12 +19,10 @@ type Props = {
 
 export default function ProfileSelectScreen({ navigation }: Props) {
   const selectProfile = useRoastStore(s => s.selectProfile);
-  const startRoast = useRoastStore(s => s.startRoast);
 
   function handleSelect(profile: RoastProfile) {
     selectProfile(profile);
-    startRoast();
-    navigation.navigate('Roast');
+    navigation.navigate('Recipe');
   }
 
   return (

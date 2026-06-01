@@ -82,8 +82,18 @@ export default function RoastScreen({ navigation }: Props) {
   const phase = currentEvent?.phase ?? 'preheat';
   const phaseColor = PHASE_COLORS[phase];
   const phaseTextColor = PHASE_TEXT_COLORS[phase];
-  const totalEvents = selectedProfile.events.length;
-  const stepNumber  = (currentEvent?.index ?? 0) + 1;
+  const actionEvents = selectedProfile.events.filter(e => e.type === 'action');
+  const totalSteps   = actionEvents.length;
+  const isInfoEvent  = currentEvent?.type === 'info';
+  // For action events: which action step number is this?
+  const actionStepNumber = currentEvent
+    ? selectedProfile.events.slice(0, (currentEvent.index ?? 0) + 1).filter(e => e.type === 'action').length
+    : 0;
+  // Info counter (for info events)
+  const infoNumber = currentEvent
+    ? selectedProfile.events.slice(0, (currentEvent.index ?? 0) + 1).filter(e => e.type === 'info').length
+    : 0;
+  const stepLabel = isInfoEvent ? `Info ${infoNumber}` : `${actionStepNumber}/${totalSteps}`;
 
   const actionsComplete = currentEvent
     ? areActionsComplete(engineState, currentEvent.index)
@@ -170,9 +180,11 @@ export default function RoastScreen({ navigation }: Props) {
                 {/* Step counter — right */}
                 <View style={styles.tempBadgeSide}>
                   <Text style={[styles.tempSideValue, { color: phaseTextColor }]}>
-                    {stepNumber}/{totalEvents}
+                    {stepLabel}
                   </Text>
-                  <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>step</Text>
+                  <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>
+                    {isInfoEvent ? 'note' : 'step'}
+                  </Text>
                 </View>
               </View>
             </View>

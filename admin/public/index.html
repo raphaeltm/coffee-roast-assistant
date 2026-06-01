@@ -77,11 +77,13 @@
     .profile-meta { display: flex; gap: 16px; margin-bottom: 24px; }
     .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
     .field label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
-    .field input, .field select {
+    .field input, .field select, .field textarea {
       background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px;
       color: #fff; padding: 10px 12px; font-size: 14px; width: 100%;
+      font-family: inherit;
     }
-    .field input:focus, .field select:focus { outline: none; border-color: #e67e22; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #e67e22; }
+    .field textarea { resize: vertical; min-height: 60px; }
 
     /* Events */
     .events-header {
@@ -368,10 +370,14 @@ function collectCurrentProfile() {
   if (!selectedProfileId) return;
   const p = getProfile(selectedProfileId);
   if (!p) return;
-  const nameEl = document.getElementById('pf-name');
+  const nameEl    = document.getElementById('pf-name');
   const roasterEl = document.getElementById('pf-roaster');
-  if (nameEl) p.name = nameEl.value;
+  const recipeEl  = document.getElementById('pf-recipe');
+  const dtpEl     = document.getElementById('pf-dtp');
+  if (nameEl)    p.name    = nameEl.value;
   if (roasterEl) p.roaster = roasterEl.value;
+  if (recipeEl)  p.recipe  = recipeEl.value.trim() || undefined;
+  if (dtpEl)     p.dtp_target = dtpEl.value !== '' ? parseFloat(dtpEl.value) : undefined;
 
   p.events.forEach((ev, i) => {
     const get = id => document.getElementById(id);
@@ -413,10 +419,15 @@ function renderProfile(id) {
         <div class="field">
           <label>Profile Name</label>
           <input id="pf-name" value="${p.name}" oninput="markDirty()" />
+          <label style="margin-top:12px">Recipe</label>
+          <textarea id="pf-recipe" rows="2" oninput="markDirty()">${p.recipe ?? ''}</textarea>
         </div>
         <div class="field">
           <label>Roaster</label>
           <input id="pf-roaster" value="${p.roaster}" oninput="markDirty()" />
+          <label style="margin-top:12px">DTP Target %</label>
+          <input id="pf-dtp" type="number" min="0" max="100" step="0.1"
+            value="${p.dtp_target ?? ''}" placeholder="e.g. 22" oninput="markDirty()" />
         </div>
       </div>
 
@@ -442,10 +453,18 @@ function renderEventCard(ev, i, total) {
   const noteItems = ev.type === 'action' ? (ev.notes || []) : [];
   const infoItems = ev.type === 'info' ? (ev.info || []) : [];
 
+  // Compute step label: action events count as steps, info events get their own count
+  const p = getProfile(selectedProfileId);
+  const actionsBefore = p.events.slice(0, i + 1).filter(e => e.type === 'action').length;
+  const infosBefore   = p.events.slice(0, i + 1).filter(e => e.type === 'info').length;
+  const stepLabel = ev.type === 'action'
+    ? `Step ${actionsBefore}`
+    : `Info ${infosBefore}`;
+
   return `
     <div class="event-card" id="eventCard-${i}">
       <div class="event-card-header" onclick="toggleEvent(${i})">
-        <div class="event-index">${i}</div>
+        <div class="event-index" title="index ${i}">${stepLabel}</div>
         <div class="event-phase-dot" style="background:${color}"></div>
         <div class="event-summary">
           <div class="event-summary-title">${ev.trigger.temperature}°F (${ev.trigger.source}) — ${ev.phase}</div>
