@@ -176,7 +176,7 @@
     }
     .type-toggle button.active { background: #e67e22; border-color: #e67e22; color: #fff; }
 
-    .phase-colors { preheat: #3A3A3A; }
+    /* Phase colours live in the PHASE_COLORS JS object below */
   </style>
 </head>
 <body>
@@ -226,7 +226,7 @@
 <script>
 const PHASE_COLORS = {
   preheat: '#3A3A3A', drying: '#3B82F6', maillard: '#EAB308',
-  development: '#EF4444', end: '#3A3A3A'
+  development: '#4e0065', end: '#3A3A3A'
 };
 const PHASES = ['preheat','drying','maillard','development','end'];
 const SOURCES = ['ART','PID'];

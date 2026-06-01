@@ -106,19 +106,21 @@ export function areActionsComplete(state: EngineState, eventIndex: number): bool
 }
 
 /**
- * Returns seconds remaining until next event's estimated time.
- * Returns null if next event has no estimated time (no alert will fire).
+ * Returns seconds remaining until the current event's estimated time.
+ * Returns null if the current event has no estimated time (no alert will fire).
+ * Pre-alert fires based on the step you are ON, not the next step —
+ * so advancing early from a prior step never suppresses it.
  * Artisan note: this same function will work with live elapsed time from Artisan.
  */
 export function evaluatePreAlert(
   elapsedSeconds: number,
-  nextEvent: RoastEvent | null,
+  currentEvent: RoastEvent | null,
   thresholdSeconds: number,
 ): { preAlertActive: boolean; secondsUntilNext: number | null } {
-  if (!nextEvent || nextEvent.estimated_time_seconds === null) {
+  if (!currentEvent || currentEvent.estimated_time_seconds === null) {
     return { preAlertActive: false, secondsUntilNext: null };
   }
-  const secondsUntilNext = nextEvent.estimated_time_seconds - elapsedSeconds;
+  const secondsUntilNext = currentEvent.estimated_time_seconds - elapsedSeconds;
   return {
     preAlertActive: secondsUntilNext <= thresholdSeconds && secondsUntilNext > 0,
     secondsUntilNext: Math.round(secondsUntilNext),

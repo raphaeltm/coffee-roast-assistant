@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RoastProfile } from '../types';
 import {
   EngineState,
@@ -8,6 +9,8 @@ import {
   evaluatePreAlert,
 } from '../engine/roastEngine';
 import { alertThresholdSeconds as DEFAULT_ALERT_THRESHOLD, testOffsetSeconds } from '../data';
+
+const THRESHOLD_STORAGE_KEY = '@alert_threshold';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
@@ -22,6 +25,7 @@ interface RoastStore {
   // Settings
   alertThresholdSeconds: number;
   setAlertThreshold: (seconds: number) => void;
+  loadSettings: () => Promise<void>;
 
   selectProfile: (profile: RoastProfile) => void;
   startRoast: () => void;
@@ -47,7 +51,17 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   preAlertActive: false,
   secondsUntilNext: null,
   alertThresholdSeconds: DEFAULT_ALERT_THRESHOLD,
-  setAlertThreshold: (seconds) => set({ alertThresholdSeconds: seconds }),
+  setAlertThreshold: (seconds) => {
+    set({ alertThresholdSeconds: seconds });
+    AsyncStorage.setItem(THRESHOLD_STORAGE_KEY, String(seconds));
+  },
+  loadSettings: async () => {
+    const val = await AsyncStorage.getItem(THRESHOLD_STORAGE_KEY);
+    if (val !== null) {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed)) set({ alertThresholdSeconds: parsed });
+    }
+  },
 
   selectProfile: (profile) => {
     clearTimer();

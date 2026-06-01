@@ -74,6 +74,9 @@ export default function RoastScreen({ navigation }: Props) {
       }
     }
     prevPreAlert.current = preAlertActive;
+  // currentOption intentionally omitted: we only want to fire on the rising edge of
+  // preAlertActive, not re-fire if the user changes sound while an alert is active.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preAlertActive]);
 
   if (!engineState || !selectedProfile) return null;
@@ -135,10 +138,10 @@ export default function RoastScreen({ navigation }: Props) {
               (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
             ]}>
               {currentEstDisplay}
-            </Animated.Text>          
-          <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
-            ▶ {timerDisplay}
-          </Text>
+            </Animated.Text>
+            <Text style={[styles.timerDisplay, { color: phaseTextColor }]}>
+              ▶ {timerDisplay}
+            </Text>
           </View>
         )}
         <Text style={[styles.profileName, { color: phaseTextColor }]}>
