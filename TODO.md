@@ -65,7 +65,9 @@
 - [x] `TemperatureProvider` abstraction interface + `ManualProvider` stub (`src/engine/temperatureProvider.ts`)
 - [x] Python WebSocket bridge (`bridge/bridge.py`) — relays Artisan data to iPhone app
 - [x] Bridge hardened for websockets ≥13, defensive coercion, RoR calculation, per-client queues (PR #4)
-- [x] Bridge developer docs + Node.js test harness (`bridge/proto/`)
+- [x] Bridge developer docs + Node.js test harness (`bridge/proto/`) — all 5 scenarios pass
+- [x] Bridge venv setup (`bridge/.venv/`), gitignored; `run-tests.js` Python path fixed
+- [ ] Bridge IP input + connection status in Settings screen
 - [ ] Wire `ArtisanProvider` into the Zustand store (replace `ManualProvider`)
 - [ ] Live temperature display in RoastScreen
 - [ ] Automated event triggering when temperature thresholds are reached
