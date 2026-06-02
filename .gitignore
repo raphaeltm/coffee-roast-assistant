@@ -34,6 +34,10 @@ yarn-error.*
 # Claude
 .claude/
 
+# Python virtual environments
+.venv/
+venv/
+
 # local env files
 .env*.local
 

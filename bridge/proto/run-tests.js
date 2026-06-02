@@ -10,7 +10,7 @@ const { spawn } = require("child_process");
 const net = require("net");
 const path = require("path");
 
-const PY = "/tmp/bridgevenv/bin/python";
+const PY = process.env.BRIDGE_PYTHON || "/Users/peter/PycharmProjects/coffee-roast-assistant/bridge/.venv/bin/python3";
 const HERE = __dirname;
 const FIXED = path.join(HERE, "..", "bridge.py");
 const ORIGINAL = path.join(HERE, "bridge_original.py");
