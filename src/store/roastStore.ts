@@ -7,8 +7,10 @@ import {
   toggleAction,
   advanceToNextEvent,
   evaluatePreAlert,
+  evaluateTemperature,
 } from '../engine/roastEngine';
 import { alertThresholdSeconds as DEFAULT_ALERT_THRESHOLD, testOffsetSeconds } from '../data';
+import { ArtisanProvider } from '../engine/artisanProvider';
 
 const THRESHOLD_STORAGE_KEY = '@alert_threshold';
 const BRIDGE_IP_STORAGE_KEY = '@bridge_ip';
@@ -32,6 +34,9 @@ interface RoastStore {
   bridgeIp: string;
   setBridgeIp: (ip: string) => void;
   wsStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
+  btLive: number | null;
+  etLive: number | null;
+  rorLive: number | null;
 
   selectProfile: (profile: RoastProfile) => void;
   startRoast: () => void;
@@ -48,6 +53,13 @@ function clearTimer() {
     timerInterval = null;
   }
 }
+
+const artisanProvider = new ArtisanProvider((status) => {
+  useRoastStore.setState({ wsStatus: status });
+  if (status === 'disconnected' || status === 'error') {
+    useRoastStore.setState({ btLive: null, etLive: null, rorLive: null });
+  }
+});
 
 export const useRoastStore = create<RoastStore>((set, get) => ({
   selectedProfile: null,
@@ -66,8 +78,16 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   setBridgeIp: (ip) => {
     set({ bridgeIp: ip });
     AsyncStorage.setItem(BRIDGE_IP_STORAGE_KEY, ip);
+    if (ip.trim()) {
+      artisanProvider.connect(ip.trim());
+    } else {
+      artisanProvider.disconnect();
+    }
   },
   wsStatus: 'disconnected',
+  btLive: null,
+  etLive: null,
+  rorLive: null,
   loadSettings: async () => {
     const [thresholdVal, bridgeIpVal] = await Promise.all([
       AsyncStorage.getItem(THRESHOLD_STORAGE_KEY),
@@ -77,7 +97,10 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
       const parsed = parseInt(thresholdVal, 10);
       if (!isNaN(parsed)) set({ alertThresholdSeconds: parsed });
     }
-    if (bridgeIpVal !== null) set({ bridgeIp: bridgeIpVal });
+    if (bridgeIpVal !== null) {
+      set({ bridgeIp: bridgeIpVal });
+      if (bridgeIpVal.trim()) artisanProvider.connect(bridgeIpVal.trim());
+    }
   },
 
   selectProfile: (profile) => {
@@ -108,7 +131,7 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
       const now = Date.now() - testOffsetSeconds * 1000;
       clearTimer();
       timerInterval = setInterval(() => {
-        const { engineState: es, roastStartedAt: startedAt, alertThresholdSeconds: threshold } = get();
+        const { engineState: es, roastStartedAt: startedAt, alertThresholdSeconds: threshold, selectedProfile: profile } = get();
         if (!startedAt) return;
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const { preAlertActive, secondsUntilNext } = evaluatePreAlert(
@@ -116,7 +139,27 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
           es?.currentEvent ?? null,
           threshold,
         );
-        set({ elapsedSeconds: elapsed, preAlertActive, secondsUntilNext });
+
+        // Read live temperature from ArtisanProvider
+        const bt = artisanProvider.getBT();
+        const et = artisanProvider.getET();
+        const ror = artisanProvider.getRoR();
+
+        // Temperature-driven auto-advancement (Phase 3 core)
+        let updatedEngineState = es;
+        if (bt !== null && es && profile && !es.isComplete) {
+          updatedEngineState = evaluateTemperature(profile, bt, es);
+        }
+
+        set({
+          elapsedSeconds: elapsed,
+          preAlertActive,
+          secondsUntilNext,
+          btLive: bt,
+          etLive: et,
+          rorLive: ror,
+          engineState: updatedEngineState,
+        });
       }, 1000);
       set({ engineState: newEngineState, roastStartedAt: now, preAlertActive: false, secondsUntilNext: null });
       return;
@@ -130,6 +173,6 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
 
   resetRoast: () => {
     clearTimer();
-    set({ selectedProfile: null, engineState: null, roastStartedAt: null, elapsedSeconds: 0, preAlertActive: false, secondsUntilNext: null });
+    set({ selectedProfile: null, engineState: null, roastStartedAt: null, elapsedSeconds: 0, preAlertActive: false, secondsUntilNext: null, btLive: null, etLive: null, rorLive: null });
   },
 }));
