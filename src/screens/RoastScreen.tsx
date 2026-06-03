@@ -34,6 +34,13 @@ export default function RoastScreen({ navigation }: Props) {
   const roastStartedAt  = useRoastStore(s => s.roastStartedAt);
   const preAlertActive  = useRoastStore(s => s.preAlertActive);
   const secondsUntilNext = useRoastStore(s => s.secondsUntilNext);
+  const btLive          = useRoastStore(s => s.btLive);
+  const rorLive         = useRoastStore(s => s.rorLive);
+  const wsStatus        = useRoastStore(s => s.wsStatus);
+  const bridgeIp        = useRoastStore(s => s.bridgeIp);
+
+  const isLive = btLive !== null && wsStatus === 'connected';
+  const showManualWarning = bridgeIp.trim() !== '' && wsStatus !== 'connected';
 
   // Derived values computed before hooks (use optional chaining for safety)
   const currentEst = engineState?.currentEvent?.estimated_time_seconds ?? null;
@@ -117,6 +124,15 @@ export default function RoastScreen({ navigation }: Props) {
 
   const profileShort = (selectedProfile.name ?? '').slice(0, 8);
 
+  // ETA to next threshold using live BT + RoR (when connected)
+  const nextTriggerTemp = nextEvent?.trigger.temperature ?? null;
+  const etaSeconds: number | null = (() => {
+    if (!isLive || btLive === null || rorLive === null || rorLive <= 0 || nextTriggerTemp === null) return null;
+    const delta = nextTriggerTemp - btLive;
+    if (delta <= 0) return 0;
+    return Math.round((delta / rorLive) * 60);
+  })();
+
   function handleExit() {
     resetRoast();
     navigation.goBack();
@@ -144,9 +160,19 @@ export default function RoastScreen({ navigation }: Props) {
             </Text>
           </View>
         )}
-        <Text style={[styles.profileName, { color: phaseTextColor }]}>
-          {profileShort}
-        </Text>
+        {isLive ? (
+          <View style={styles.modePill}>
+            <Text style={styles.modePillLive}>● LIVE</Text>
+          </View>
+        ) : showManualWarning ? (
+          <View style={styles.modePill}>
+            <Text style={styles.modePillManual}>⚠ MANUAL</Text>
+          </View>
+        ) : (
+          <Text style={[styles.profileName, { color: phaseTextColor }]}>
+            {profileShort}
+          </Text>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -157,27 +183,59 @@ export default function RoastScreen({ navigation }: Props) {
             {/* Temperature reference (informational only in MVP 1) */}
             <View style={[styles.tempBadge, { backgroundColor: phaseColor }]}>
               <View style={styles.tempBadgeRow}>
-                {/* Time remaining — left */}
+                {/* Left panel — target temp + ETA when live, time remaining when manual */}
                 <View style={styles.tempBadgeSide}>
-                  <Animated.Text style={[
-                    styles.tempSideValue,
-                    { color: phaseTextColor, opacity: blinkAnim },
-                    isOverdue && { color: '#FF4444', fontWeight: '800' },
-                    (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
-                  ]}>
-                    {timeRemainingDisplay}
-                  </Animated.Text>
-                  <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>remaining</Text>
+                  {isLive ? (
+                    <>
+                      <Text style={[styles.tempSideValue, { color: phaseTextColor }]}>
+                        {nextTriggerTemp !== null ? `${nextTriggerTemp}°F` : '—'}
+                      </Text>
+                      <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>target</Text>
+                      {etaSeconds !== null && (
+                        <Text style={[styles.tempSideEta, { color: phaseTextColor }]}>
+                          ~{formatTime(etaSeconds)}
+                        </Text>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Animated.Text style={[
+                        styles.tempSideValue,
+                        { color: phaseTextColor, opacity: blinkAnim },
+                        isOverdue && { color: '#FF4444', fontWeight: '800' },
+                        (currentEst === null && preAlertActive) && { color: '#FFB347', fontWeight: '800' },
+                      ]}>
+                        {timeRemainingDisplay}
+                      </Animated.Text>
+                      <Text style={[styles.tempSideLabel, { color: phaseTextColor }]}>remaining</Text>
+                    </>
+                  )}
                 </View>
 
                 {/* Temp — centre */}
                 <View style={styles.tempBadgeCenter}>
-                  <Text style={[styles.tempLabel, { color: phaseTextColor }]}>
-                    {currentEvent.trigger.source} ref
-                  </Text>
-                  <Text style={[styles.tempValue, { color: phaseTextColor }]}>
-                    {currentEvent.trigger.temperature}°{currentEvent.trigger.unit}
-                  </Text>
+                  {isLive ? (
+                    <>
+                      <Text style={[styles.tempLabel, { color: phaseTextColor }]}>BT live</Text>
+                      <Text style={[styles.tempValue, { color: phaseTextColor }]}>
+                        {Math.round(btLive!)}°F
+                      </Text>
+                      {rorLive !== null && (
+                        <Text style={[styles.rorLabel, { color: phaseTextColor }]}>
+                          {rorLive > 0 ? '+' : ''}{Math.round(rorLive)}°/min
+                        </Text>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Text style={[styles.tempLabel, { color: phaseTextColor }]}>
+                        {currentEvent.trigger.source} ref
+                      </Text>
+                      <Text style={[styles.tempValue, { color: phaseTextColor }]}>
+                        {currentEvent.trigger.temperature}°{currentEvent.trigger.unit}
+                      </Text>
+                    </>
+                  )}
                 </View>
 
                 {/* Step counter — right */}
@@ -423,4 +481,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exitButtonText: { color: '#555', fontSize: 15 },
+
+  modePill: { width: 70, alignItems: 'flex-end' },
+  modePillLive: { color: '#2ECC71', fontSize: 12, fontWeight: '700', letterSpacing: 0.8 },
+  modePillManual: { color: '#E67E22', fontSize: 12, fontWeight: '700', letterSpacing: 0.8 },
+
+  rorLabel: { fontSize: 13, fontWeight: '600', opacity: 0.8, marginTop: 4 },
+  tempSideEta: { fontSize: 12, fontWeight: '600', opacity: 0.75, marginTop: 3, fontVariant: ['tabular-nums'] },
 });
