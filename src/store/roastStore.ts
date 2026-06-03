@@ -11,6 +11,7 @@ import {
 import { alertThresholdSeconds as DEFAULT_ALERT_THRESHOLD, testOffsetSeconds } from '../data';
 
 const THRESHOLD_STORAGE_KEY = '@alert_threshold';
+const BRIDGE_IP_STORAGE_KEY = '@bridge_ip';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
@@ -26,6 +27,11 @@ interface RoastStore {
   alertThresholdSeconds: number;
   setAlertThreshold: (seconds: number) => void;
   loadSettings: () => Promise<void>;
+
+  // Artisan bridge
+  bridgeIp: string;
+  setBridgeIp: (ip: string) => void;
+  wsStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
 
   selectProfile: (profile: RoastProfile) => void;
   startRoast: () => void;
@@ -55,12 +61,23 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
     set({ alertThresholdSeconds: seconds });
     AsyncStorage.setItem(THRESHOLD_STORAGE_KEY, String(seconds));
   },
+
+  bridgeIp: '',
+  setBridgeIp: (ip) => {
+    set({ bridgeIp: ip });
+    AsyncStorage.setItem(BRIDGE_IP_STORAGE_KEY, ip);
+  },
+  wsStatus: 'disconnected',
   loadSettings: async () => {
-    const val = await AsyncStorage.getItem(THRESHOLD_STORAGE_KEY);
-    if (val !== null) {
-      const parsed = parseInt(val, 10);
+    const [thresholdVal, bridgeIpVal] = await Promise.all([
+      AsyncStorage.getItem(THRESHOLD_STORAGE_KEY),
+      AsyncStorage.getItem(BRIDGE_IP_STORAGE_KEY),
+    ]);
+    if (thresholdVal !== null) {
+      const parsed = parseInt(thresholdVal, 10);
       if (!isNaN(parsed)) set({ alertThresholdSeconds: parsed });
     }
+    if (bridgeIpVal !== null) set({ bridgeIp: bridgeIpVal });
   },
 
   selectProfile: (profile) => {

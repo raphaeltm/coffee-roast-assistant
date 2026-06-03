@@ -1,6 +1,7 @@
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
@@ -22,6 +23,9 @@ export default function SettingsScreen({ navigation }: Props) {
   const { soundKey, setSoundKey } = useSoundPreference();
   const alertThresholdSeconds = useRoastStore(s => s.alertThresholdSeconds);
   const setAlertThreshold = useRoastStore(s => s.setAlertThreshold);
+  const bridgeIp = useRoastStore(s => s.bridgeIp);
+  const setBridgeIp = useRoastStore(s => s.setBridgeIp);
+  const wsStatus = useRoastStore(s => s.wsStatus);
 
   async function previewSound(key: AlertSoundKey) {
     const option = SOUND_OPTIONS.find(o => o.key === key);
@@ -84,6 +88,23 @@ export default function SettingsScreen({ navigation }: Props) {
             {soundKey === option.key && <Text style={styles.checkmark}>✓</Text>}
           </TouchableOpacity>
         ))}
+
+        {/* Artisan Bridge */}
+        <Text style={[styles.sectionLabel, { marginTop: 32 }]}>ARTISAN BRIDGE</Text>
+        <Text style={styles.sectionHint}>IP address of the computer running bridge.py (e.g. 192.168.1.42)</Text>
+        <View style={styles.bridgeRow}>
+          <TextInput
+            style={styles.bridgeInput}
+            value={bridgeIp}
+            onChangeText={setBridgeIp}
+            placeholder="192.168.1.42"
+            placeholderTextColor="#444"
+            keyboardType="decimal-pad"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View style={[styles.statusDot, styles[`statusDot_${wsStatus}`]]} />
+        </View>
 
       </ScrollView>
     </SafeAreaView>
@@ -157,4 +178,30 @@ const styles = StyleSheet.create({
   soundLabelActive: { color: '#FFB347' },
   soundDesc: { color: '#555', fontSize: 13, marginTop: 2 },
   checkmark: { color: '#FFB347', fontSize: 18, fontWeight: '700' },
+
+  bridgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bridgeInput: {
+    flex: 1,
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+    color: '#FFF',
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  statusDot_disconnected: { backgroundColor: '#444' },
+  statusDot_connecting:   { backgroundColor: '#E67E22' },
+  statusDot_connected:    { backgroundColor: '#2ECC71' },
+  statusDot_error:        { backgroundColor: '#E74C3C' },
 });
