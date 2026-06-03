@@ -47,24 +47,15 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 
 ---
 
-## Step 4 — Build ArtisanProvider
+## Step 4 — Build ArtisanProvider ✅ DONE
 
 **New file:** `src/engine/artisanProvider.ts`
 
-Implements `TemperatureProvider` interface:
-```typescript
-export class ArtisanProvider implements TemperatureProvider {
-  // Opens WebSocket to bridge URL
-  // Parses { bt, et, t, ror } JSON
-  // Exposes getBT(), getET(), getRoR()
-  // Handles connect/disconnect/reconnect
-}
-```
-
-**Key decisions to make:**
-- Does it manage its own WebSocket, or does the store manage it?
-- Reconnect strategy (backoff? immediate retry?)
-- What happens in the app when the bridge drops mid-roast? (fall back to manual)
+- Implements `TemperatureProvider` — `getBT/getET/getRoR` return null until connected
+- Manages its own WebSocket; auto-reconnects after 3s on drop
+- Status changes reported via callback → drives the Settings dot (Step 3)
+- `disconnect()` clears values immediately → engine falls back to manual mode
+- Malformed bridge frames are silently skipped; last known values retained
 
 ---
 
