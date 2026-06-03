@@ -69,7 +69,7 @@
 - [x] Bridge venv setup (`bridge/.venv/`), gitignored; `run-tests.js` Python path fixed
 - [x] Bridge IP input + connection status dot in Settings screen (persisted via AsyncStorage)
 - [x] `ArtisanProvider` built (`src/engine/artisanProvider.ts`) — WebSocket, auto-reconnect, status callback
-- [ ] Wire `ArtisanProvider` into the Zustand store (replace `ManualProvider`)
+- [x] Wire `ArtisanProvider` into Zustand store — `btLive` drives `evaluateTemperature()` auto-advance
 - [ ] Live temperature display in RoastScreen
 - [ ] Automated event triggering when temperature thresholds are reached
 - [ ] RoR display and prediction using live data

@@ -59,14 +59,15 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 
 ---
 
-## Step 5 — Wire ArtisanProvider into the store
+## Step 5 — Wire ArtisanProvider into the store ✅ DONE
 
 **File:** `src/store/roastStore.ts`
 
-- Replace `ManualProvider` with `ArtisanProvider` when `bridgeUrl` is set
-- Add `btLive`, `etLive`, `rorLive` state fields
-- Feed live BT into `evaluateTemperature()` in the engine (this is the big moment — auto-advancement)
-- Keep manual advancement as fallback when no live data
+- `ArtisanProvider` singleton at module level; status callback drives `wsStatus`
+- `setBridgeIp` connects/disconnects immediately; `loadSettings` reconnects on restart
+- `btLive`, `etLive`, `rorLive` added to store state, updated every 1s timer tick
+- `evaluateTemperature()` called each tick when `btLive != null` — auto-advances events
+- Manual advancement fully functional as fallback when bridge is disconnected
 
 ---
 
