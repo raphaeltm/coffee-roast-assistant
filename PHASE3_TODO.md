@@ -36,14 +36,14 @@ Terminal 3:  node bridge/proto/run-tests.js
 
 ---
 
-## Step 3 — Add bridge IP setting to the app
+## Step 3 — Add bridge IP setting to the app ✅ DONE
 
-**Files to change:**
-- `src/screens/SettingsScreen.tsx` — add a text input for bridge IP address (e.g. `192.168.1.42`)
-- `src/store/roastStore.ts` — add `bridgeUrl` state, persisted via AsyncStorage
-- `src/hooks/useSoundPreference.ts` — no change needed
+**Files changed:**
+- `src/screens/SettingsScreen.tsx` — IP text input + colour-coded status dot
+- `src/store/roastStore.ts` — `bridgeIp` (persisted), `setBridgeIp`, `wsStatus` added
 
-**UX:** Simple text field in Settings, below the alert threshold. Show connection status dot (grey/green/red).
+**Status dot:** grey = disconnected, orange = connecting, green = connected, red = error.
+Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 
 ---
 
