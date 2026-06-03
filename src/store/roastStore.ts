@@ -57,6 +57,7 @@ interface RoastStore {
 }
 
 let timerInterval: ReturnType<typeof setInterval> | null = null;
+let bridgeDebounce: ReturnType<typeof setTimeout> | null = null;
 
 function clearTimer() {
   if (timerInterval !== null) {
@@ -105,11 +106,15 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   setBridgeIp: (ip) => {
     set({ bridgeIp: ip });
     AsyncStorage.setItem(BRIDGE_IP_STORAGE_KEY, ip);
-    if (ip.trim()) {
-      artisanProvider.connect(ip.trim());
-    } else {
-      artisanProvider.disconnect();
-    }
+    // Debounce WebSocket connect to avoid thrashing while user types
+    if (bridgeDebounce) clearTimeout(bridgeDebounce);
+    bridgeDebounce = setTimeout(() => {
+      if (ip.trim()) {
+        artisanProvider.connect(ip.trim());
+      } else {
+        artisanProvider.disconnect();
+      }
+    }, 800);
   },
   wsStatus: 'disconnected',
   btLive: null,

@@ -1,5 +1,5 @@
 # Phase 3 — Artisan Integration: To-Do
-_Temporary reference file — delete after new session is underway_
+_Phase 3 development checklist — kept for tracking progress_
 
 ---
 

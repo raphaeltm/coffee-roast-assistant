@@ -42,7 +42,7 @@ export default function RoastScreen({ navigation }: Props) {
   const tempAlertMaxF   = useRoastStore(s => s.tempAlertMaxF);
   const tempAlertPct    = useRoastStore(s => s.tempAlertPct);
   const isLive = btLive !== null && wsStatus === 'connected';
-  const showManualWarning = bridgeIp.trim() !== '' && wsStatus !== 'connected';
+  const showManualWarning = bridgeIp.trim() !== '' && wsStatus !== 'connected' && wsStatus !== 'connecting';
 
   // Derived timer values
   const currentEst = engineState?.currentEvent?.estimated_time_seconds ?? null;
