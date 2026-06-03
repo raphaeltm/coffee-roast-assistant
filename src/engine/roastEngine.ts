@@ -55,15 +55,11 @@ export function evaluateTemperature(
 
   const nextEvent = events[nextIndex];
 
-  // Only advance ONE step, and only when:
-  //   1. BT has reached the next event's temperature threshold
-  //   2. All actions on the current event are checked off
-  // This prevents skipping steps (e.g. after charge when BT > multiple thresholds)
-  // and ensures the roaster confirms every action before moving on.
-  if (
-    currentTemp >= nextEvent.trigger.temperature &&
-    areActionsComplete(state, state.currentEventIndex)
-  ) {
+  // Advance ONE step when BT reaches the next event's threshold.
+  // Action acknowledgment is tracked separately in the UI — the engine
+  // never waits for the roaster to tap buttons. This mirrors how Artisan
+  // works: the roast progresses regardless of operator actions.
+  if (currentTemp >= nextEvent.trigger.temperature) {
     const currentEvent = nextEvent;
     const upcomingEvent = events[nextIndex + 1] ?? null;
     const isComplete = nextIndex === events.length - 1 && currentEvent?.phase === 'end';

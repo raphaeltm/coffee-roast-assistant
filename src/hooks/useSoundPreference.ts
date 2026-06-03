@@ -73,7 +73,7 @@ export const SOUND_OPTIONS: SoundOption[] = [
   },
 ];
 
-const DEFAULT_KEY: AlertSoundKey = 'woodblock_calaudio';
+const DEFAULT_KEY: AlertSoundKey = 'claves_gewa_dry';
 
 export function useSoundPreference() {
   const [soundKey, setSoundKeyState] = useState<AlertSoundKey>(DEFAULT_KEY);

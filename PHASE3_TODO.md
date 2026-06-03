@@ -66,7 +66,8 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 - `ArtisanProvider` singleton at module level; status callback drives `wsStatus`
 - `setBridgeIp` connects/disconnects immediately; `loadSettings` reconnects on restart
 - `btLive`, `etLive`, `rorLive` added to store state, updated every 1s timer tick
-- `evaluateTemperature()` called each tick when `btLive != null` — auto-advances events
+- Live BT/ET/RoR updated every 1s timer tick (display + alerts only)
+- Engine never auto-advances — user must confirm every step via action buttons
 - Manual advancement fully functional as fallback when bridge is disconnected
 
 ---
@@ -81,7 +82,10 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 - Temperature-based alerts: `clamp(minF, gap × pct%, maxF)` — fires only when `isRising` (rorLive > 0)
 - RoR arrows: red ▲ rising, blue ▼ dropping
 - LIVE / MANUAL mode indicator in header
-- Next button shows "Target approaching — Next →" when temp alert active
+- Action buttons replace checkboxes: amber (locked) → green (ready, BT ≥ trigger) → red blink (overdue)
+- Tapping last action button advances to next step (no separate Next button in live mode)
+- Two-tier alerts: clave (normal) for all steps + loud original at 400°F for Charge only
+- Default sound changed to clave; time-based alerts are visual-only (no sound/haptic)
 
 **Also in this step:**
 - `src/engine/roastEngine.ts` — `evaluateTemperature` fixed to advance ONE step at a time with `areActionsComplete` gate

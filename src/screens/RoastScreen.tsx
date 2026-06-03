@@ -17,7 +17,7 @@ import { ActionEvent, InfoEvent } from '../types';
 import { areActionsComplete } from '../engine/roastEngine';
 import { formatTime } from '../utils/formatTime';
 import { RootStackParamList } from '../../App';
-import { useSoundPreference } from '../hooks/useSoundPreference';
+import { useSoundPreference, SOUND_OPTIONS } from '../hooks/useSoundPreference';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Roast'>;
@@ -123,8 +123,28 @@ export default function RoastScreen({ navigation }: Props) {
     ? effectiveTarget - btLive : null;
   const tempApproaching = isRising && degreesToTarget !== null && degreesToTarget > 0 && degreesToTarget <= tempAlertThreshold;
 
-  // Blink when overdue (time), pre-alert (time), or approaching target temp (live)
-  const shouldBlink = isOverdue || preAlertActive || tempApproaching;
+  // Critical alert: loud "original" sound at 400°F for Charge step only
+  const CRITICAL_TEMP = 400;
+  const isChargeNext = (() => {
+    if (!selectedProfile || !engineState) return false;
+    // Check if the effective target belongs to a Charge event
+    const nextIdx = engineState.currentEventIndex + 1;
+    const targetEvent = (currentTriggerTemp !== null && btLive !== null && btLive < currentTriggerTemp)
+      ? engineState.currentEvent
+      : (nextIdx < selectedProfile.events.length ? selectedProfile.events[nextIdx] : null);
+    if (!targetEvent || targetEvent.type !== 'action') return false;
+    return (targetEvent as ActionEvent).actions.some(a => a.toLowerCase().includes('charge'));
+  })();
+  const criticalAlert = isLive && isChargeNext && isRising && btLive !== null && btLive >= CRITICAL_TEMP && btLive < (effectiveTarget ?? Infinity);
+
+  // Action overdue: BT is rising, passed current trigger by 5°F+, and user hasn't confirmed
+  const actionOverdue = isLive && isRising && btLive !== null && currentTriggerTemp !== null
+    && btLive >= currentTriggerTemp + 5
+    && engineState !== null && engineState.currentEvent?.type === 'action'
+    && !areActionsComplete(engineState, engineState.currentEvent.index);
+
+  // Blink when overdue (time), pre-alert (time), approaching target temp (live), or action overdue
+  const shouldBlink = isOverdue || preAlertActive || tempApproaching || criticalAlert || actionOverdue;
 
   const blinkAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
@@ -142,26 +162,40 @@ export default function RoastScreen({ navigation }: Props) {
     }
   }, [shouldBlink]);
 
-  // Fire haptic + sound on pre-alert OR temp approach rising edge
+  // Play a sound file helper
+  const playSound = useRef((soundRequire: number) => {
+    Audio.Sound.createAsync(soundRequire, { shouldPlay: true, volume: 1.0 })
+      .then(({ sound }) => {
+        sound.setOnPlaybackStatusUpdate(status => {
+          if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
+        });
+      }).catch(() => {/* silent fail */});
+  }).current;
+
+  // Normal alert: clave (or user-selected sound) on temp approach
   const prevAlertRef = useRef(false);
-  const shouldAlert = preAlertActive || tempApproaching;
   useEffect(() => {
-    if (shouldAlert && !prevAlertRef.current) {
+    if (tempApproaching && !prevAlertRef.current) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      if (currentOption.require !== null) {
-        Audio.Sound.createAsync(
-          currentOption.require,
-          { shouldPlay: true, volume: 1.0 },
-        ).then(({ sound }) => {
-          sound.setOnPlaybackStatusUpdate(status => {
-            if ('didJustFinish' in status && status.didJustFinish) sound.unloadAsync();
-          });
-        }).catch(() => {/* silent fail */});
-      }
+      if (currentOption.require !== null) playSound(currentOption.require);
     }
-    prevAlertRef.current = shouldAlert;
+    prevAlertRef.current = tempApproaching;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldAlert]);
+  }, [tempApproaching]);
+
+  // Critical alert: loud original sound at 400°F for Charge
+  const criticalFiredRef = useRef(false);
+  const criticalSoundRequire = SOUND_OPTIONS.find(o => o.key === 'alert')?.require ?? null;
+  useEffect(() => {
+    if (criticalAlert && !criticalFiredRef.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (criticalSoundRequire !== null) playSound(criticalSoundRequire);
+      criticalFiredRef.current = true;
+    }
+    // Reset when we move past charge (effective target changes)
+    if (!isChargeNext) criticalFiredRef.current = false;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [criticalAlert, isChargeNext]);
 
   if (!engineState || !selectedProfile) return null;
 
@@ -181,9 +215,24 @@ export default function RoastScreen({ navigation }: Props) {
     : 0;
   const stepLabel = isInfoEvent ? `Info ${infoNumber}` : `${actionStepNumber}/${totalSteps}`;
 
+  // In live mode, engine auto-advances by temperature. Action buttons are
+  // for roaster acknowledgment only. In manual mode, keep old Next-button flow.
   const actionsComplete = currentEvent
     ? areActionsComplete(engineState, currentEvent.index) : true;
   const canAdvance = currentEvent?.type === 'info' || actionsComplete;
+
+  // Track whether the engine has moved ahead of acknowledged actions.
+  // When the engine advances past a step whose actions weren't confirmed,
+  // those actions become "overdue" — the buttons should blink.
+  const pendingAcks: number[] = [];
+  if (engineState && selectedProfile) {
+    for (let i = 0; i < engineState.currentEventIndex; i++) {
+      const ev = selectedProfile.events[i];
+      if (ev.type === 'action' && !areActionsComplete(engineState, ev.index)) {
+        pendingAcks.push(ev.index);
+      }
+    }
+  }
 
   const profileShort = (selectedProfile.name ?? '').slice(0, 10);
 
@@ -300,25 +349,49 @@ export default function RoastScreen({ navigation }: Props) {
               </View>
             </View>
 
-            {/* Action checkboxes */}
+            {/* Action buttons */}
             {currentEvent.type === 'action' && (
               <View style={styles.actionList}>
                 <Text style={styles.sectionTitle}>Actions</Text>
                 {(currentEvent as ActionEvent).actions.map((action, i) => {
                   const done = completedActions[currentEvent.index]?.[i] ?? false;
+                  if (done) return null; // confirmed actions disappear
+                  // In live mode: locked until BT reaches trigger (with 2°F tolerance to avoid flicker)
+                  const canTap = !isLive || (btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp - 2);
+                  // Overdue: BT rising, passed the target by 5°F+, user hasn't confirmed — blink
+                  const overdue = canTap && isLive && isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp + 5;
                   return (
-                    <TouchableOpacity
-                      key={i}
-                      style={styles.actionRow}
-                      onPress={() => toggleAction(currentEvent.index, i)}
-                    >
-                      <View style={[styles.checkbox, done && { backgroundColor: phaseColor, borderColor: phaseColor }]}>
-                        {done && <Text style={styles.checkmark}>✓</Text>}
-                      </View>
-                      <Text style={[styles.actionText, done && styles.actionTextDone]}>
-                        {action}
-                      </Text>
-                    </TouchableOpacity>
+                    <Animated.View key={i} style={overdue ? { opacity: blinkAnim } : undefined}>
+                      <TouchableOpacity
+                        style={[
+                          styles.actionButton,
+                          !canTap && styles.actionButtonLocked,
+                          canTap && !overdue && styles.actionButtonReady,
+                          overdue && styles.actionButtonOverdue,
+                        ]}
+                        onPress={() => {
+                          if (!canTap) return;
+                          toggleAction(currentEvent.index, i);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          // Always advance when the last action for this step is confirmed
+                          const actions = (currentEvent as ActionEvent).actions;
+                          const allOthersDone = actions.every((_, j) =>
+                            j === i || (completedActions[currentEvent.index]?.[j] ?? false)
+                          );
+                          if (allOthersDone) {
+                            // Small delay to let toggleAction's set() flush
+                            setTimeout(() => advanceEvent(), 0);
+                          }
+                        }}
+                      >
+                        <Text style={[
+                          styles.actionButtonText,
+                          !canTap && styles.actionButtonTextLocked,
+                        ]}>
+                          {action}
+                        </Text>
+                      </TouchableOpacity>
+                    </Animated.View>
                   );
                 })}
                 {(currentEvent as ActionEvent).notes?.map((note, i) => (
@@ -368,30 +441,62 @@ export default function RoastScreen({ navigation }: Props) {
           </View>
         )}
 
-        {/* Next button */}
-        {!isComplete && (
+        {/* Pending acknowledgments — blink reminder for actions the roaster hasn't confirmed */}
+        {pendingAcks.length > 0 && selectedProfile && (
+          <Animated.View style={[styles.pendingCard, { opacity: blinkAnim }]}>
+            <Text style={styles.pendingTitle}>Confirm previous actions:</Text>
+            {pendingAcks.map(evIdx => {
+              const ev = selectedProfile.events.find(e => e.index === evIdx);
+              if (!ev || ev.type !== 'action') return null;
+              return (ev as ActionEvent).actions.map((action, i) => {
+                const done = completedActions[evIdx]?.[i] ?? false;
+                if (done) return null;
+                return (
+                  <TouchableOpacity
+                    key={`${evIdx}-${i}`}
+                    style={[styles.actionButton, styles.actionButtonOverdue]}
+                    onPress={() => {
+                      toggleAction(evIdx, i);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }}
+                  >
+                    <Text style={styles.actionButtonText}>{action}</Text>
+                  </TouchableOpacity>
+                );
+              });
+            })}
+          </Animated.View>
+        )}
+
+        {/* Next button — manual mode fallback + info events */}
+        {!isComplete && !isLive && (
           <TouchableOpacity
             style={[
               styles.nextButton,
-              !canAdvance && !shouldAlert && styles.nextButtonDisabled,
-              shouldAlert && styles.nextButtonAlert,
+              !canAdvance && styles.nextButtonDisabled,
             ]}
             onPress={advanceEvent}
             disabled={!canAdvance}
           >
             <Text style={[
               styles.nextButtonText,
-              !canAdvance && !shouldAlert && styles.nextButtonTextDisabled,
-              shouldAlert && styles.nextButtonTextAlert,
+              !canAdvance && styles.nextButtonTextDisabled,
             ]}>
-              {tempApproaching && canAdvance
-                ? `🌡 Target approaching — Next →`
-                : preAlertActive && secondsUntilNext !== null
-                  ? `⏱ Engage in ~${secondsUntilNext}s${canAdvance ? ' — Next →' : ''}`
-                  : !canAdvance
-                    ? 'Check all actions to continue'
-                    : 'Next →'}
+              {preAlertActive && secondsUntilNext !== null
+                ? `⏱ Engage in ~${secondsUntilNext}s${canAdvance ? ' — Next →' : ''}`
+                : !canAdvance
+                  ? 'Complete all actions to continue'
+                  : 'Next →'}
             </Text>
+          </TouchableOpacity>
+        )}
+        {/* Info events in live mode still need a Next button */}
+        {!isComplete && isLive && currentEvent?.type === 'info' && (
+          <TouchableOpacity
+            style={styles.nextButton}
+            onPress={advanceEvent}
+          >
+            <Text style={styles.nextButtonText}>Next →</Text>
           </TouchableOpacity>
         )}
 
@@ -451,7 +556,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2A',
+    borderBottomColor: '#474747',
   },
   liveBarSide: {
     width: 80,
@@ -539,19 +644,69 @@ const styles = StyleSheet.create({
   actionList: { padding: 20, gap: 16 },
   sectionTitle: { color: '#888', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
 
-  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  checkbox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+  /* Action buttons — replace checkboxes */
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: '#444',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#1A1A1A',
+    gap: 12,
   },
-  checkmark: { color: '#FFF', fontSize: 17, fontWeight: '700' },
-  actionText: { color: '#FFF', fontSize: 19, flex: 1 },
-  actionTextDone: { color: '#555', textDecorationLine: 'line-through' },
+  actionButtonLocked: {
+    borderColor: '#E67E22',
+    backgroundColor: '#1A1400',
+    opacity: 0.6,
+  },
+  actionButtonReady: {
+    borderColor: '#5B9A6A',
+    backgroundColor: '#0F1A12',
+  },
+  actionButtonDone: {
+    borderColor: '#2A2A2A',
+    backgroundColor: '#1A1A1A',
+  },
+  actionButtonOverdue: {
+    borderColor: '#E74C3C',
+    backgroundColor: '#1F0A0A',
+  },
+  actionButtonCheckmark: {
+    color: '#5B9A6A',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  actionButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
+    flex: 1,
+  },
+  actionButtonTextLocked: {
+    color: '#888',
+  },
+  actionButtonTextDone: {
+    color: '#555',
+    textDecorationLine: 'line-through',
+  },
+
+  /* Pending acks card */
+  pendingCard: {
+    backgroundColor: '#1F0A0A',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E74C3C',
+    gap: 10,
+  },
+  pendingTitle: {
+    color: '#E74C3C',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   noteText: { color: '#888', fontSize: 13, fontStyle: 'italic' },
   infoText: { color: '#FFF', fontSize: 16, lineHeight: 24 },
 

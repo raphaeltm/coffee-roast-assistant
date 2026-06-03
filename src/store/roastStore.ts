@@ -7,7 +7,6 @@ import {
   toggleAction,
   advanceToNextEvent,
   evaluatePreAlert,
-  evaluateTemperature,
 } from '../engine/roastEngine';
 import { alertThresholdSeconds as DEFAULT_ALERT_THRESHOLD, testOffsetSeconds } from '../data';
 import { ArtisanProvider } from '../engine/artisanProvider';
@@ -178,7 +177,7 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
       const now = Date.now() - testOffsetSeconds * 1000;
       clearTimer();
       timerInterval = setInterval(() => {
-        const { engineState: es, roastStartedAt: startedAt, alertThresholdSeconds: threshold, selectedProfile: profile } = get();
+        const { engineState: es, roastStartedAt: startedAt, alertThresholdSeconds: threshold } = get();
         if (!startedAt) return;
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         const { preAlertActive, secondsUntilNext } = evaluatePreAlert(
@@ -187,16 +186,11 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
           threshold,
         );
 
-        // Read live temperature from ArtisanProvider
+        // Read live temperature from ArtisanProvider (display + alerts only)
+        // Engine never auto-advances — user must confirm every step.
         const bt = artisanProvider.getBT();
         const et = artisanProvider.getET();
         const ror = artisanProvider.getRoR();
-
-        // Temperature-driven auto-advancement (Phase 3 core)
-        let updatedEngineState = es;
-        if (bt !== null && es && profile && !es.isComplete) {
-          updatedEngineState = evaluateTemperature(profile, bt, es);
-        }
 
         set({
           elapsedSeconds: elapsed,
@@ -205,7 +199,6 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
           btLive: bt,
           etLive: et,
           rorLive: ror,
-          engineState: updatedEngineState,
         });
       }, 1000);
       set({ engineState: newEngineState, roastStartedAt: now, preAlertActive: false, secondsUntilNext: null });

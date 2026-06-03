@@ -72,7 +72,8 @@
 - [x] Wire `ArtisanProvider` into Zustand store — `btLive` drives `evaluateTemperature()` auto-advance
 - [x] Live BT + RoR display in RoastScreen (two-header layout, always visible)
 - [x] Temperature-driven alerts: `clamp(minF, gap×pct%, maxF)`, rising-only, configurable in Settings
-- [x] `evaluateTemperature` single-step advance with actions-complete gate
+- [x] User-driven advancement: action buttons (amber→green→red blink), no auto-advance
+- [x] Two-tier alerts: clave (all steps) + loud original at 400°F (Charge critical)
 - [x] Effective target logic (adapts to pre-charge rise vs post-charge climb)
 - [x] Realistic E46 mock curve (S-curve sigmoid, 370→405→165→410°F)
 - [ ] Windows laptop testing with real Artisan
