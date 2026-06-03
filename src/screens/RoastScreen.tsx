@@ -65,8 +65,8 @@ export default function RoastScreen({ navigation }: Props) {
   // - If BT > current trigger and next is higher: approaching next step
   // - If temp is dropping: no effective target (no alert)
   const isRising = rorLive !== null && rorLive > 0;
-  const { effectiveTarget, effectiveGap } = (() => {
-    if (!isLive || btLive === null || !isRising) return { effectiveTarget: null, effectiveGap: null };
+  const { effectiveTarget, effectiveGap, effectiveTargetEst } = (() => {
+    if (!isLive || btLive === null || !isRising) return { effectiveTarget: null, effectiveGap: null, effectiveTargetEst: null };
 
     // BT hasn't reached current event's trigger yet (e.g. climbing to charge at 405)
     if (currentTriggerTemp !== null && btLive < currentTriggerTemp) {
@@ -75,25 +75,44 @@ export default function RoastScreen({ navigation }: Props) {
         ? selectedProfile?.events[prevIndex]?.trigger.temperature ?? null : null;
       const gap = prevTrigger !== null && currentTriggerTemp > prevTrigger
         ? currentTriggerTemp - prevTrigger : null;
-      return { effectiveTarget: currentTriggerTemp, effectiveGap: gap };
+      const est = engineState?.currentEvent?.estimated_time_seconds ?? null;
+      return { effectiveTarget: currentTriggerTemp, effectiveGap: gap, effectiveTargetEst: est };
     }
 
     // Normal case: heading towards next trigger (must be higher than current BT)
     if (nextTriggerTemp !== null && nextTriggerTemp > btLive) {
       const gap = currentTriggerTemp !== null && nextTriggerTemp > currentTriggerTemp
         ? nextTriggerTemp - currentTriggerTemp : null;
-      return { effectiveTarget: nextTriggerTemp, effectiveGap: gap };
+      const est = engineState?.nextEvent?.estimated_time_seconds ?? null;
+      return { effectiveTarget: nextTriggerTemp, effectiveGap: gap, effectiveTargetEst: est };
     }
 
-    return { effectiveTarget: null, effectiveGap: null };
+    return { effectiveTarget: null, effectiveGap: null, effectiveTargetEst: null };
   })();
 
-  // ETA to effective target (advisory only)
+  // ETA to effective target (advisory, biased slightly early)
+  // Uses RoR-based projection when RoR is stable (≥5°F/min), otherwise
+  // falls back to profile time estimates. When both are available, takes
+  // the minimum so the roaster is warned sooner rather than later.
+  const MIN_ROR_FOR_ETA = 5; // °F/min — below this RoR is too unstable
   const etaSeconds: number | null = (() => {
-    if (!isLive || btLive === null || rorLive === null || rorLive <= 0 || effectiveTarget === null) return null;
+    if (!isLive || btLive === null || effectiveTarget === null) return null;
     const delta = effectiveTarget - btLive;
     if (delta <= 0) return 0;
-    return Math.round((delta / rorLive) * 60);
+
+    // RoR-based ETA (only when RoR is stable enough)
+    const rorEta = (rorLive !== null && rorLive >= MIN_ROR_FOR_ETA)
+      ? Math.round((delta / rorLive) * 60)
+      : null;
+
+    // Time-based ETA from profile estimates
+    const timeEta = (effectiveTargetEst !== null && roastStartedAt !== null)
+      ? Math.max(0, effectiveTargetEst - elapsedSeconds)
+      : null;
+
+    // Use whichever is available; if both, take the smaller (err early)
+    if (rorEta !== null && timeEta !== null) return Math.min(rorEta, timeEta);
+    return rorEta ?? timeEta;
   })();
 
   // Temperature approach alert: fires only when rising towards target
