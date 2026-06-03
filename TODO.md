@@ -70,10 +70,13 @@
 - [x] Bridge IP input + connection status dot in Settings screen (persisted via AsyncStorage)
 - [x] `ArtisanProvider` built (`src/engine/artisanProvider.ts`) — WebSocket, auto-reconnect, status callback
 - [x] Wire `ArtisanProvider` into Zustand store — `btLive` drives `evaluateTemperature()` auto-advance
-- [ ] Live temperature display in RoastScreen
-- [ ] Automated event triggering when temperature thresholds are reached
-- [ ] RoR display and prediction using live data
-- [ ] Semi-automated roasting assistance mode
+- [x] Live BT + RoR display in RoastScreen (two-header layout, always visible)
+- [x] Temperature-driven alerts: `clamp(minF, gap×pct%, maxF)`, rising-only, configurable in Settings
+- [x] `evaluateTemperature` single-step advance with actions-complete gate
+- [x] Effective target logic (adapts to pre-charge rise vs post-charge climb)
+- [x] Realistic E46 mock curve (S-curve sigmoid, 370→405→165→410°F)
+- [ ] Windows laptop testing with real Artisan
+- [ ] Semi-automated roasting assistance mode (future)
 
 ---
 

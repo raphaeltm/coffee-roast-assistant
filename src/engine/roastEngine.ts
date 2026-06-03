@@ -50,28 +50,34 @@ export function evaluateTemperature(
   if (state.isComplete) return state;
 
   const events = profile.events;
-  let newIndex = state.currentEventIndex;
+  const nextIndex = state.currentEventIndex + 1;
+  if (nextIndex >= events.length) return state;
 
-  // Advance through events whose temperature threshold has been reached
-  for (let i = state.currentEventIndex; i < events.length; i++) {
-    if (currentTemp >= events[i].trigger.temperature) {
-      newIndex = i;
-    } else {
-      break;
-    }
+  const nextEvent = events[nextIndex];
+
+  // Only advance ONE step, and only when:
+  //   1. BT has reached the next event's temperature threshold
+  //   2. All actions on the current event are checked off
+  // This prevents skipping steps (e.g. after charge when BT > multiple thresholds)
+  // and ensures the roaster confirms every action before moving on.
+  if (
+    currentTemp >= nextEvent.trigger.temperature &&
+    areActionsComplete(state, state.currentEventIndex)
+  ) {
+    const currentEvent = nextEvent;
+    const upcomingEvent = events[nextIndex + 1] ?? null;
+    const isComplete = nextIndex === events.length - 1 && currentEvent?.phase === 'end';
+
+    return {
+      ...state,
+      currentEvent,
+      nextEvent: upcomingEvent,
+      currentEventIndex: nextIndex,
+      isComplete,
+    };
   }
 
-  const currentEvent = events[newIndex] ?? null;
-  const nextEvent = events[newIndex + 1] ?? null;
-  const isComplete = newIndex === events.length - 1 && currentEvent?.phase === 'end';
-
-  return {
-    ...state,
-    currentEvent,
-    nextEvent,
-    currentEventIndex: newIndex,
-    isComplete,
-  };
+  return state;
 }
 
 /**

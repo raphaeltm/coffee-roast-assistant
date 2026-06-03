@@ -26,6 +26,12 @@ export default function SettingsScreen({ navigation }: Props) {
   const bridgeIp = useRoastStore(s => s.bridgeIp);
   const setBridgeIp = useRoastStore(s => s.setBridgeIp);
   const wsStatus = useRoastStore(s => s.wsStatus);
+  const tempAlertMinF = useRoastStore(s => s.tempAlertMinF);
+  const setTempAlertMinF = useRoastStore(s => s.setTempAlertMinF);
+  const tempAlertMaxF = useRoastStore(s => s.tempAlertMaxF);
+  const setTempAlertMaxF = useRoastStore(s => s.setTempAlertMaxF);
+  const tempAlertPct = useRoastStore(s => s.tempAlertPct);
+  const setTempAlertPct = useRoastStore(s => s.setTempAlertPct);
 
   async function previewSound(key: AlertSoundKey) {
     const option = SOUND_OPTIONS.find(o => o.key === key);
@@ -88,6 +94,55 @@ export default function SettingsScreen({ navigation }: Props) {
             {soundKey === option.key && <Text style={styles.checkmark}>✓</Text>}
           </TouchableOpacity>
         ))}
+
+        {/* Temperature Alert */}
+        <Text style={[styles.sectionLabel, { marginTop: 32 }]}>LIVE TEMP ALERT</Text>
+        <Text style={styles.sectionHint}>Alert when BT is within this range of the next target (live mode only)</Text>
+
+        <Text style={[styles.sectionLabel, { marginTop: 16, fontSize: 11 }]}>MINIMUM °F</Text>
+        <View style={styles.pillRow}>
+          {[2, 3, 5, 8, 10].map(val => (
+            <TouchableOpacity
+              key={val}
+              style={[styles.pill, tempAlertMinF === val && styles.pillActive]}
+              onPress={() => setTempAlertMinF(val)}
+            >
+              <Text style={[styles.pillText, tempAlertMinF === val && styles.pillTextActive]}>
+                {val}°F
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={[styles.sectionLabel, { marginTop: 16, fontSize: 11 }]}>MAXIMUM °F</Text>
+        <View style={styles.pillRow}>
+          {[8, 10, 15, 20, 25].map(val => (
+            <TouchableOpacity
+              key={val}
+              style={[styles.pill, tempAlertMaxF === val && styles.pillActive]}
+              onPress={() => setTempAlertMaxF(val)}
+            >
+              <Text style={[styles.pillText, tempAlertMaxF === val && styles.pillTextActive]}>
+                {val}°F
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={[styles.sectionLabel, { marginTop: 16, fontSize: 11 }]}>% OF GAP</Text>
+        <View style={styles.pillRow}>
+          {[15, 20, 30, 40, 50].map(val => (
+            <TouchableOpacity
+              key={val}
+              style={[styles.pill, tempAlertPct === val && styles.pillActive]}
+              onPress={() => setTempAlertPct(val)}
+            >
+              <Text style={[styles.pillText, tempAlertPct === val && styles.pillTextActive]}>
+                {val}%
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         {/* Artisan Bridge */}
         <Text style={[styles.sectionLabel, { marginTop: 32 }]}>ARTISAN BRIDGE</Text>

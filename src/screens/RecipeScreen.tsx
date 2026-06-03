@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,10 +14,11 @@ export default function RecipeScreen({ navigation }: Props) {
   const selectedProfile = useRoastStore(s => s.selectedProfile);
   const startRoast      = useRoastStore(s => s.startRoast);
 
-  if (!selectedProfile) {
-    navigation.goBack();
-    return null;
-  }
+  useEffect(() => {
+    if (!selectedProfile) navigation.goBack();
+  }, [selectedProfile, navigation]);
+
+  if (!selectedProfile) return null;
 
   function handleStart() {
     startRoast();

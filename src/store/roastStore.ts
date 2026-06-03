@@ -14,6 +14,9 @@ import { ArtisanProvider } from '../engine/artisanProvider';
 
 const THRESHOLD_STORAGE_KEY = '@alert_threshold';
 const BRIDGE_IP_STORAGE_KEY = '@bridge_ip';
+const TEMP_ALERT_MIN_F_KEY = '@temp_alert_min_f';
+const TEMP_ALERT_MAX_F_KEY = '@temp_alert_max_f';
+const TEMP_ALERT_PCT_KEY = '@temp_alert_pct';
 
 interface RoastStore {
   selectedProfile: RoastProfile | null;
@@ -29,6 +32,14 @@ interface RoastStore {
   alertThresholdSeconds: number;
   setAlertThreshold: (seconds: number) => void;
   loadSettings: () => Promise<void>;
+
+  // Temperature alert (live mode)
+  tempAlertMinF: number;
+  tempAlertMaxF: number;
+  tempAlertPct: number;
+  setTempAlertMinF: (val: number) => void;
+  setTempAlertMaxF: (val: number) => void;
+  setTempAlertPct: (val: number) => void;
 
   // Artisan bridge
   bridgeIp: string;
@@ -74,6 +85,22 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
     AsyncStorage.setItem(THRESHOLD_STORAGE_KEY, String(seconds));
   },
 
+  tempAlertMinF: 3,
+  tempAlertMaxF: 15,
+  tempAlertPct: 30,
+  setTempAlertMinF: (val) => {
+    set({ tempAlertMinF: val });
+    AsyncStorage.setItem(TEMP_ALERT_MIN_F_KEY, String(val));
+  },
+  setTempAlertMaxF: (val) => {
+    set({ tempAlertMaxF: val });
+    AsyncStorage.setItem(TEMP_ALERT_MAX_F_KEY, String(val));
+  },
+  setTempAlertPct: (val) => {
+    set({ tempAlertPct: val });
+    AsyncStorage.setItem(TEMP_ALERT_PCT_KEY, String(val));
+  },
+
   bridgeIp: '',
   setBridgeIp: (ip) => {
     set({ bridgeIp: ip });
@@ -89,13 +116,28 @@ export const useRoastStore = create<RoastStore>((set, get) => ({
   etLive: null,
   rorLive: null,
   loadSettings: async () => {
-    const [thresholdVal, bridgeIpVal] = await Promise.all([
+    const [thresholdVal, bridgeIpVal, minFVal, maxFVal, pctVal] = await Promise.all([
       AsyncStorage.getItem(THRESHOLD_STORAGE_KEY),
       AsyncStorage.getItem(BRIDGE_IP_STORAGE_KEY),
+      AsyncStorage.getItem(TEMP_ALERT_MIN_F_KEY),
+      AsyncStorage.getItem(TEMP_ALERT_MAX_F_KEY),
+      AsyncStorage.getItem(TEMP_ALERT_PCT_KEY),
     ]);
     if (thresholdVal !== null) {
       const parsed = parseInt(thresholdVal, 10);
       if (!isNaN(parsed)) set({ alertThresholdSeconds: parsed });
+    }
+    if (minFVal !== null) {
+      const parsed = parseInt(minFVal, 10);
+      if (!isNaN(parsed)) set({ tempAlertMinF: parsed });
+    }
+    if (maxFVal !== null) {
+      const parsed = parseInt(maxFVal, 10);
+      if (!isNaN(parsed)) set({ tempAlertMaxF: parsed });
+    }
+    if (pctVal !== null) {
+      const parsed = parseInt(pctVal, 10);
+      if (!isNaN(parsed)) set({ tempAlertPct: parsed });
     }
     if (bridgeIpVal !== null) {
       set({ bridgeIp: bridgeIpVal });

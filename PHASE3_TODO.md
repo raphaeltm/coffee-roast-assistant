@@ -71,14 +71,24 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 
 ---
 
-## Step 6 — Display live data in RoastScreen
+## Step 6 — Display live data in RoastScreen ✅ DONE
 
-**File:** `src/screens/RoastScreen.tsx`
+**File:** `src/screens/RoastScreen.tsx` (major redesign)
 
-Minimum viable display:
-- Show live BT in the temperature badge (replacing the static reference temp)
-- Highlight when BT is approaching the next threshold
-- Show RoR somewhere (small, advisory)
+- Two-header layout: phase header (skinny, phase-coloured) + live bar (always visible)
+- Live bar shows: effective target + ETA | live BT with coloured RoR arrows | elapsed time
+- `effectiveTarget` logic: if BT < current trigger → target is current; if BT > current and next is higher → target is next
+- Temperature-based alerts: `clamp(minF, gap × pct%, maxF)` — fires only when `isRising` (rorLive > 0)
+- RoR arrows: red ▲ rising, blue ▼ dropping
+- LIVE / MANUAL mode indicator in header
+- Next button shows "Target approaching — Next →" when temp alert active
+
+**Also in this step:**
+- `src/engine/roastEngine.ts` — `evaluateTemperature` fixed to advance ONE step at a time with `areActionsComplete` gate
+- `src/screens/SettingsScreen.tsx` — added LIVE TEMP ALERT section (min °F, max °F, % of gap pill selectors)
+- `src/store/roastStore.ts` — added `tempAlertMinF/MaxF/Pct` with setters + AsyncStorage persistence
+- `src/screens/RecipeScreen.tsx` — fixed setState-during-render (moved `goBack` to `useEffect`)
+- `bridge/proto/mock_artisan.js` — realistic E46 S-curve: 370→405 pre-charge, 405→165 drop, 165→410 sigmoid climb
 
 ---
 
