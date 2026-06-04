@@ -33,7 +33,6 @@ export default function RoastScreen({ navigation }: Props) {
   const elapsedSeconds  = useRoastStore(s => s.elapsedSeconds);
   const roastStartedAt  = useRoastStore(s => s.roastStartedAt);
   const preAlertActive  = useRoastStore(s => s.preAlertActive);
-  const secondsUntilNext = useRoastStore(s => s.secondsUntilNext);
   const btLive          = useRoastStore(s => s.btLive);
   const rorLive         = useRoastStore(s => s.rorLive);
   const wsStatus        = useRoastStore(s => s.wsStatus);
@@ -214,12 +213,6 @@ export default function RoastScreen({ navigation }: Props) {
     ? selectedProfile.events.slice(0, (currentEvent.index ?? 0) + 1).filter(e => e.type === 'info').length
     : 0;
   const stepLabel = isInfoEvent ? `Info ${infoNumber}` : `${actionStepNumber}/${totalSteps}`;
-
-  // In live mode, engine auto-advances by temperature. Action buttons are
-  // for roaster acknowledgment only. In manual mode, keep old Next-button flow.
-  const actionsComplete = currentEvent
-    ? areActionsComplete(engineState, currentEvent.index) : true;
-  const canAdvance = currentEvent?.type === 'info' || actionsComplete;
 
   // Track whether the engine has moved ahead of acknowledged actions.
   // When the engine advances past a step whose actions weren't confirmed,
@@ -468,30 +461,8 @@ export default function RoastScreen({ navigation }: Props) {
           </Animated.View>
         )}
 
-        {/* Next button — manual mode fallback + info events */}
-        {!isComplete && !isLive && (
-          <TouchableOpacity
-            style={[
-              styles.nextButton,
-              !canAdvance && styles.nextButtonDisabled,
-            ]}
-            onPress={advanceEvent}
-            disabled={!canAdvance}
-          >
-            <Text style={[
-              styles.nextButtonText,
-              !canAdvance && styles.nextButtonTextDisabled,
-            ]}>
-              {preAlertActive && secondsUntilNext !== null
-                ? `⏱ Engage in ~${secondsUntilNext}s${canAdvance ? ' — Next →' : ''}`
-                : !canAdvance
-                  ? 'Complete all actions to continue'
-                  : 'Next →'}
-            </Text>
-          </TouchableOpacity>
-        )}
-        {/* Info events in live mode still need a Next button */}
-        {!isComplete && isLive && currentEvent?.type === 'info' && (
+        {/* Next button — info events only (action steps use action buttons) */}
+        {!isComplete && currentEvent?.type === 'info' && (
           <TouchableOpacity
             style={styles.nextButton}
             onPress={advanceEvent}
