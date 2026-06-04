@@ -59,11 +59,31 @@ export default function RoastScreen({ navigation }: Props) {
   // Next event's target temp (what we're heading towards)
   const nextTriggerTemp = engineState?.nextEvent?.trigger.temperature ?? null;
 
+
   // Effective target: what BT is climbing towards right now
   // - If BT < current trigger: approaching current step (e.g. rising to 405 for charge)
   // - If BT > current trigger and next is higher: approaching next step
   // - If temp is dropping: no effective target (no alert)
   const isRising = rorLive !== null && rorLive > 0;
+
+  // Latch: once BT rises to the trigger from below, the button stays unlocked.
+  // Resets on step change. Requires BT to have been below the trigger first
+  // (prevents false latch when BT is high but dropping through a lower target).
+  const tempReachedRef = useRef(false);
+  const seenBelowRef = useRef(false);
+  const stepIndexRef = useRef(engineState?.currentEventIndex ?? -1);
+  if (engineState && engineState.currentEventIndex !== stepIndexRef.current) {
+    stepIndexRef.current = engineState.currentEventIndex;
+    tempReachedRef.current = false;
+    seenBelowRef.current = false;
+  }
+  if (btLive !== null && currentTriggerTemp !== null && btLive < currentTriggerTemp) {
+    seenBelowRef.current = true;
+  }
+  if (seenBelowRef.current && isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp - 2) {
+    tempReachedRef.current = true;
+  }
+  const tempReachedLatched = tempReachedRef.current;
   const { effectiveTarget, effectiveGap, effectiveTargetEst } = (() => {
     if (!isLive || btLive === null || !isRising) return { effectiveTarget: null, effectiveGap: null, effectiveTargetEst: null };
 
@@ -121,6 +141,26 @@ export default function RoastScreen({ navigation }: Props) {
   const degreesToTarget = (effectiveTarget !== null && btLive !== null)
     ? effectiveTarget - btLive : null;
   const tempApproaching = isRising && degreesToTarget !== null && degreesToTarget > 0 && degreesToTarget <= tempAlertThreshold;
+
+  // BT has reached the effective target (within 2°F while rising)
+  const btReached = isRising && degreesToTarget !== null && degreesToTarget <= 2 && degreesToTarget >= -2;
+
+  // Gentle pulse for target label (slower, subtler than BT blink)
+  const targetPulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (tempApproaching && !btReached) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(targetPulse, { toValue: 0.5, duration: 1200, useNativeDriver: true }),
+          Animated.timing(targetPulse, { toValue: 1, duration: 1200, useNativeDriver: true }),
+        ])
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      targetPulse.setValue(1);
+    }
+  }, [tempApproaching, btReached]);
 
   // Critical alert: loud "original" sound at 400°F for Charge step only
   const CRITICAL_TEMP = 400;
@@ -260,9 +300,14 @@ export default function RoastScreen({ navigation }: Props) {
       <View style={styles.liveBar}>
         {/* Left — effective target + ETA */}
         <View style={styles.liveBarSide}>
-          <Text style={styles.liveBarValue}>
+          <Animated.Text style={[
+            styles.liveBarValue,
+            { fontSize: 24 },
+            tempApproaching && !btReached && { color: '#5B9A6A', opacity: targetPulse },
+            btReached && { color: '#5B9A6A' },
+          ]}>
             {effectiveTarget !== null ? `${effectiveTarget}°F` : (currentTriggerTemp !== null ? `${currentTriggerTemp}°F` : '—')}
-          </Text>
+          </Animated.Text>
           <Text style={styles.liveBarLabel}>target</Text>
           {etaSeconds !== null && etaSeconds > 0 && (
             <Text style={styles.liveBarEta}>~{formatTime(etaSeconds)}</Text>
@@ -275,8 +320,9 @@ export default function RoastScreen({ navigation }: Props) {
             <>
               <Animated.Text style={[
                 styles.liveBarBT,
-                { opacity: tempApproaching ? blinkAnim : 1 },
-                tempApproaching && styles.liveBarBTApproaching,
+                { opacity: (tempApproaching && !btReached) ? blinkAnim : 1 },
+                tempApproaching && !btReached && styles.liveBarBTApproaching,
+                btReached && { color: '#5B9A6A' },
               ]}>
                 {Math.round(btLive!)}°F
               </Animated.Text>
@@ -349,8 +395,8 @@ export default function RoastScreen({ navigation }: Props) {
                 {(currentEvent as ActionEvent).actions.map((action, i) => {
                   const done = completedActions[currentEvent.index]?.[i] ?? false;
                   if (done) return null; // confirmed actions disappear
-                  // In live mode: locked until BT is rising and reaches trigger (2°F tolerance)
-                  const canTap = !isLive || (isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp - 2);
+                  // In live mode: locked until BT has risen to trigger (latched — stays unlocked)
+                  const canTap = !isLive || tempReachedLatched;
                   // Overdue: BT rising, passed the target by 5°F+, user hasn't confirmed — blink
                   const overdue = canTap && isLive && isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp + 5;
                   return (
