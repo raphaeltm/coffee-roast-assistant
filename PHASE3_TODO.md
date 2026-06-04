@@ -82,10 +82,12 @@ Dot stays grey until `ArtisanProvider` is wired in (Step 5).
 - Temperature-based alerts: `clamp(minF, gap × pct%, maxF)` — fires only when `isRising` (rorLive > 0)
 - RoR arrows: red ▲ rising, blue ▼ dropping
 - LIVE / MANUAL mode indicator in header
-- Action buttons replace checkboxes: amber (locked) → green (ready, BT ≥ trigger) → red blink (overdue)
-- Tapping last action button advances to next step (no separate Next button in live mode)
+- Action buttons replace checkboxes: amber (locked) → green (ready, BT risen to trigger) → red blink (overdue, rising 5°F+ past)
+- Latch: button stays unlocked once BT rises from below to trigger; requires seen-below-first to prevent false unlock after Charge
+- Tapping last action button advances to next step (no separate Next button)
 - Two-tier alerts: clave (normal) for all steps + loud original at 400°F for Charge only
 - Default sound changed to clave; time-based alerts are visual-only (no sound/haptic)
+- Progressive live bar colors: target pulses green (approaching) → solid green (matched); BT blinks amber → solid green
 
 **Also in this step:**
 - `src/engine/roastEngine.ts` — `evaluateTemperature` fixed to advance ONE step at a time with `areActionsComplete` gate
