@@ -356,8 +356,8 @@ export default function RoastScreen({ navigation }: Props) {
                 {(currentEvent as ActionEvent).actions.map((action, i) => {
                   const done = completedActions[currentEvent.index]?.[i] ?? false;
                   if (done) return null; // confirmed actions disappear
-                  // In live mode: locked until BT reaches trigger (with 2°F tolerance to avoid flicker)
-                  const canTap = !isLive || (btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp - 2);
+                  // In live mode: locked until BT is rising and reaches trigger (2°F tolerance)
+                  const canTap = !isLive || (isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp - 2);
                   // Overdue: BT rising, passed the target by 5°F+, user hasn't confirmed — blink
                   const overdue = canTap && isLive && isRising && btLive !== null && currentTriggerTemp !== null && btLive >= currentTriggerTemp + 5;
                   return (
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#1A1A1A',
-    paddingVertical: 14,
+    paddingVertical: 20,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#474747',
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   },
   liveBarValue: {
     color: '#CCC',
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   liveBarBT: {
     color: '#FFF',
     fontSize: 42,
-    fontWeight: '800',
+    fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
   liveBarBTApproaching: {
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   scroll: { padding: 16, gap: 14 },
 
   eventCard: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#222222',
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   infoStrip: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 14,
+    paddingVertical: 19,
     paddingHorizontal: 12,
   },
   infoStripItem: {
